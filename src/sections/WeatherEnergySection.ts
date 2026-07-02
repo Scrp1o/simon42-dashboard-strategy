@@ -28,9 +28,26 @@ export function createWeatherSection(
         icon: 'mdi:weather-partly-cloudy',
       },
       {
-        type: 'weather-forecast',
+        type: 'custom:weather-forecast-card',
+        show_current: true,
+        show_forecast: true,
+        default_forecast: 'daily',
+        tap_action: { action: 'more-info' },
         entity: weatherEntity,
-        forecast_type: 'daily',
+        show_condition_effects: true,
+        forecast: {
+          mode: 'chart',
+          show_sun_times: true,
+          scroll_to_selected: false,
+          use_color_thresholds: true,
+          temperature_precision: 1,
+        },
+        forecast_action: { tap_action: { action: 'toggle-forecast' } },
+        current: {
+          show_attributes: [],
+          secondary_info_attribute: 'humidity',
+          temperature_precision: 1,
+        },
       },
     ],
   };
