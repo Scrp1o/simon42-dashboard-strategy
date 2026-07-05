@@ -100,7 +100,9 @@
     "misc": "Sonstiges",
     "automations": "Automationen",
     "scripts": "Skripte",
-    "room_pins": "Raum-Pins"
+    "room_pins": "Raum-Pins",
+    "vacuum": "Staubsauger",
+    "vacuum_clean_here": "Diesen Raum saugen"
   },
   "editor": {
     "section_order": "Abschnitts-Reihenfolge",
@@ -139,6 +141,16 @@
     "battery_critical_below": "Kritisch unter",
     "battery_low_below": "Niedrig unter",
     "battery_thresholds_desc": "Schwellwerte für die Batterie-Statusgruppen (Kritisch / Niedrig / Gut).",
+    "section_vacuum": "Staubsauger",
+    "vacuum_entity": "Staubsauger",
+    "vacuum_entity_desc": "Saugroboter für die Raumreinigung. Es werden nur Sauger aufgelistet, die das Reinigen nach Bereich unterstützen.",
+    "vacuum_none": "Keiner",
+    "vacuum_mode_entity": "Reinigungsmodus",
+    "vacuum_mode_entity_desc": "Optionale Entität (Auswahl), um den Reinigungsmodus zu wählen; wird neben den Staubsauger-Steuerungen angezeigt.",
+    "show_vacuum_card": "Staubsauger-Karte in der Übersicht anzeigen",
+    "show_vacuum_card_desc": "Fügt der Startseite eine Staubsauger-Karte für die native Mehrbereichs-Reinigung hinzu.",
+    "vacuum_hidden_areas": "Reinigen-Button in diesen Räumen ausblenden",
+    "vacuum_hidden_areas_desc": "Räume, in denen der \"Diesen Raum saugen\"-Button nicht erscheinen soll (z. B. für den Sauger unerreichbare Räume).",
     "section_info_cards": "Info-Karten",
     "show_weather": "Wetter-Karte anzeigen",
     "show_weather_desc": "Zeigt die Wettervorhersage-Karte in der Übersicht an, wenn eine Wetter-Entität verfügbar ist.",

@@ -11,6 +11,8 @@ import type { HomeAssistant } from '../types/homeassistant';
 import type { Simon42StrategyConfig, CustomCard } from '../types/strategy';
 import type { LovelaceCardConfig, LovelaceSectionConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
+import { buildVacuumModeTile } from '../utils/vacuum';
+import { sectionSeparator } from '../utils/headings';
 
 export interface OverviewSectionParams {
   someSensorId: string | null;
@@ -34,12 +36,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   // Only show "Übersicht" heading if clock or alarm is visible
   if (showClockCard || alarmEntity) {
-    cards.push({
-      type: 'heading',
-      heading: localize('sections.overview'),
-      heading_style: 'title',
-      icon: 'mdi:overscan',
-    });
+    cards.push(sectionSeparator(localize('sections.overview'), 'mdi:overscan'));
   }
 
   if (showClockCard) {
@@ -143,10 +140,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   // Only show summaries heading and cards if at least one is enabled
   if (summaryCards.length > 0) {
-    cards.push({
-      type: 'heading',
-      heading: localize('sections.summaries'),
-    });
+    cards.push(sectionSeparator(localize('sections.summaries')));
 
     // Layout logic: adapt to number of cards
     if (summariesColumns === 4) {
@@ -171,10 +165,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
   const favoriteEntities = (config.favorite_entities || []).filter((entityId) => hass.states[entityId] !== undefined);
 
   if (favoriteEntities.length > 0) {
-    cards.push({
-      type: 'heading',
-      heading: localize('sections.favorites'),
-    });
+    cards.push(sectionSeparator(localize('sections.favorites')));
 
     const showState = config.favorites_show_state === true;
     const hideLastChanged = config.favorites_hide_last_changed === true;
@@ -191,6 +182,26 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
         ...(stateContent.length > 0 ? { state_content: stateContent } : {}),
       });
     }
+  }
+
+  // Vacuum card (overview) — native multi-area cleaning via more-info
+  const vacuumEntity = config.vacuum_entity;
+  if (config.show_vacuum_card === true && vacuumEntity && hass.states[vacuumEntity]) {
+    cards.push(sectionSeparator(localize('room.vacuum'), 'mdi:robot-vacuum'));
+    const vacuumInner: LovelaceCardConfig[] = [
+      {
+        type: 'tile',
+        entity: vacuumEntity,
+        vertical: false,
+        features: [{ type: 'vacuum-commands' }],
+        features_position: 'inline',
+      },
+    ];
+    if (config.vacuum_mode_entity) {
+      const modeTile = buildVacuumModeTile(config.vacuum_mode_entity, hass);
+      if (modeTile) vacuumInner.push(modeTile);
+    }
+    cards.push({ type: 'custom:vertical-stack-in-card', cards: vacuumInner });
   }
 
   // If nothing is visible, skip the entire section
@@ -217,7 +228,7 @@ export function createCustomCardsSection(
   if (validCards.length === 0) return null;
 
   const cards: LovelaceCardConfig[] = [
-    { type: 'heading', heading: heading || localize('sections.custom_cards'), icon: icon || 'mdi:cards' },
+    sectionSeparator(heading || localize('sections.custom_cards'), icon || 'mdi:cards'),
   ];
 
   for (const card of validCards) {

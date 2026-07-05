@@ -7,6 +7,7 @@
 
 import type { LovelaceSectionConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
+import { sectionSeparator } from '../utils/headings';
 
 /**
  * Creates the weather forecast section.
@@ -21,12 +22,7 @@ export function createWeatherSection(
   return {
     type: 'grid',
     cards: [
-      {
-        type: 'heading',
-        heading: localize('sections.weather'),
-        heading_style: 'title',
-        icon: 'mdi:weather-partly-cloudy',
-      },
+      sectionSeparator(localize('sections.weather'), 'mdi:weather-partly-cloudy'),
       {
         type: 'custom:weather-forecast-card',
         show_current: true,
@@ -66,12 +62,7 @@ export function createEnergySection(
   return {
     type: 'grid',
     cards: [
-      {
-        type: 'heading',
-        heading: localize('sections.energy'),
-        heading_style: 'title',
-        icon: 'mdi:lightning-bolt',
-      },
+      sectionSeparator(localize('sections.energy'), 'mdi:lightning-bolt'),
       {
         type: 'energy-distribution',
         link_dashboard: linkDashboard,

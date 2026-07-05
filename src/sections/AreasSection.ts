@@ -11,6 +11,7 @@ import type { LovelaceCardConfig, LovelaceSectionConfig } from '../types/lovelac
 import type { AreaRegistryEntry } from '../types/registries';
 import { Registry } from '../Registry';
 import { localize } from '../utils/localize';
+import { sectionSeparator } from '../utils/headings';
 
 // Area control domains to check (same as HA, with optional 'switch')
 const CONTROL_DOMAINS = [
@@ -156,11 +157,7 @@ export function createAreasSection(
     return {
       type: 'grid',
       cards: [
-        {
-          type: 'heading',
-          heading_style: 'title',
-          heading: localize('sections.areas'),
-        },
+        sectionSeparator(localize('sections.areas')),
         ...visibleAreas.map((area) => buildAreaCard(area, hass as HomeAssistant)),
       ],
     };
@@ -199,12 +196,7 @@ export function createAreasSection(
     sections.push({
       type: 'grid',
       cards: [
-        {
-          type: 'heading',
-          heading_style: 'title',
-          heading: floorName,
-          icon: floorIcon,
-        },
+        sectionSeparator(floorName, floorIcon),
         ...areas.map((area) => buildAreaCard(area, hass)),
       ],
     });
@@ -215,12 +207,7 @@ export function createAreasSection(
     sections.push({
       type: 'grid',
       cards: [
-        {
-          type: 'heading',
-          heading_style: 'title',
-          heading: localize('sections.areas_other'),
-          icon: 'mdi:home-outline',
-        },
+        sectionSeparator(localize('sections.areas_other'), 'mdi:home-outline'),
         ...areasWithoutFloor.map((area) => buildAreaCard(area, hass)),
       ],
     });
