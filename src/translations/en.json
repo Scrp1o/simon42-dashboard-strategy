@@ -100,7 +100,9 @@
     "misc": "Miscellaneous",
     "automations": "Automations",
     "scripts": "Scripts",
-    "room_pins": "Room Pins"
+    "room_pins": "Room Pins",
+    "vacuum": "Vacuum",
+    "vacuum_clean_here": "Clean this room"
   },
   "editor": {
     "section_order": "Section Order",
@@ -139,6 +141,16 @@
     "battery_critical_below": "Critical below",
     "battery_low_below": "Low below",
     "battery_thresholds_desc": "Thresholds for battery status groups (Critical / Low / Good).",
+    "section_vacuum": "Vacuum",
+    "vacuum_entity": "Vacuum",
+    "vacuum_entity_desc": "Robot vacuum used for room cleaning. Only vacuums that support cleaning by area are listed.",
+    "vacuum_none": "None",
+    "vacuum_mode_entity": "Cleaning mode",
+    "vacuum_mode_entity_desc": "Optional entity (select) to choose the cleaning mode, shown next to the vacuum controls.",
+    "show_vacuum_card": "Show vacuum card on overview",
+    "show_vacuum_card_desc": "Adds a vacuum card to the home view for native multi-area cleaning.",
+    "vacuum_hidden_areas": "Hide clean button in these rooms",
+    "vacuum_hidden_areas_desc": "Rooms where the \"Clean this room\" button should not appear (e.g. rooms the vacuum cannot reach).",
     "section_info_cards": "Info Cards",
     "show_weather": "Show weather card",
     "show_weather_desc": "Shows the weather forecast card on the overview when a weather entity is available.",
