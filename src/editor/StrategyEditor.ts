@@ -22,6 +22,7 @@ import { DEFAULT_SECTIONS_ORDER } from '../types/strategy';
 import type { AreaRegistryEntry, EntityRegistryEntry } from '../types/registries';
 import { localize } from '../utils/localize';
 import { isBadgeCandidate, isDefaultShowName, resolveShowName } from '../utils/badge-utils';
+import { vacuumSupportsCleanArea } from '../utils/vacuum';
 
 // -- Supporting types for the editor ------------------------------------
 
@@ -159,6 +160,30 @@ class Simon42DashboardStrategyEditor extends LitElement {
           name: stateObj.attributes?.friendly_name || entityId.split('.')[1].replace(/_/g, ' '),
         };
       })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private _getVacuumEntities(): { entity_id: string; name: string }[] {
+    if (!this._hass) return [];
+    const hass = this._hass;
+    return Object.keys(hass.states)
+      .filter((id) => id.startsWith('vacuum.') && vacuumSupportsCleanArea(hass.states[id]))
+      .map((id) => ({
+        entity_id: id,
+        name: hass.states[id].attributes?.friendly_name || id.split('.')[1].replace(/_/g, ' '),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private _getVacuumModeEntities(): { entity_id: string; name: string }[] {
+    if (!this._hass) return [];
+    const hass = this._hass;
+    return Object.keys(hass.states)
+      .filter((id) => id.startsWith('select.') || id.startsWith('input_select.'))
+      .map((id) => ({
+        entity_id: id,
+        name: hass.states[id].attributes?.friendly_name || id.split('.')[1].replace(/_/g, ' '),
+      }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -1017,6 +1042,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
         ${this._renderAreasSection()}
         ${this._renderRoomPinsSection()}
         ${this._renderViewsSection()}
+        ${this._renderVacuumSection()}
 
         <div class="section-divider">
           <div class="section-divider-title">
@@ -1565,6 +1591,58 @@ class Simon42DashboardStrategyEditor extends LitElement {
         ${this._renderCheckbox('show-room-views', localize('editor.show_room_views'), showRoomViews,
           (checked) => this._toggleChanged('show_room_views', checked, false))}
         <div class="description">${localize('editor.show_room_views_desc')}</div>
+      </div>
+    `;
+  }
+
+  private _renderVacuumSection(): TemplateResult {
+    const vacuumEntity = this._config.vacuum_entity || '';
+    const vacuumModeEntity = this._config.vacuum_mode_entity || '';
+    const showVacuumCard = this._config.show_vacuum_card === true;
+    const hiddenAreas: string[] = this._config.vacuum_hidden_areas || [];
+    const vacuums = this._getVacuumEntities();
+    const modeEntities = this._getVacuumModeEntities();
+    const areas = this._hass ? Object.values(this._hass.areas) : [];
+
+    return html`
+      <div class="section">
+        <div class="section-title">${localize('editor.section_vacuum')}</div>
+
+        <div class="form-row">
+          <label for="vacuum-entity" style="margin-right: 8px; min-width: 120px;">${localize('editor.vacuum_entity')}</label>
+          <select id="vacuum-entity" style="flex: 1;" @change=${this._vacuumEntityChanged}>
+            <option value="" ?selected=${!vacuumEntity}>${localize('editor.vacuum_none')}</option>
+            ${vacuums.map((v) => html`
+              <option value=${v.entity_id} ?selected=${v.entity_id === vacuumEntity}>${v.name}</option>
+            `)}
+          </select>
+        </div>
+        <div class="description">${localize('editor.vacuum_entity_desc')}</div>
+
+        <div class="form-row">
+          <label for="vacuum-mode-entity" style="margin-right: 8px; min-width: 120px;">${localize('editor.vacuum_mode_entity')}</label>
+          <select id="vacuum-mode-entity" style="flex: 1;" @change=${this._vacuumModeEntityChanged}>
+            <option value="" ?selected=${!vacuumModeEntity}>${localize('editor.vacuum_none')}</option>
+            ${modeEntities.map((v) => html`
+              <option value=${v.entity_id} ?selected=${v.entity_id === vacuumModeEntity}>${v.name}</option>
+            `)}
+          </select>
+        </div>
+        <div class="description">${localize('editor.vacuum_mode_entity_desc')}</div>
+
+        ${this._renderCheckbox('show-vacuum-card', localize('editor.show_vacuum_card'), showVacuumCard,
+          (checked) => this._toggleChanged('show_vacuum_card', checked, false))}
+        <div class="description">${localize('editor.show_vacuum_card_desc')}</div>
+
+        <div style="font-size: 13px; font-weight: 500; margin-top: 12px; margin-bottom: 4px;">
+          ${localize('editor.vacuum_hidden_areas')}
+        </div>
+        <div class="description">${localize('editor.vacuum_hidden_areas_desc')}</div>
+        ${areas.map((a) => this._renderCheckbox(
+          `vacuum-hide-${a.area_id}`,
+          a.name,
+          hiddenAreas.includes(a.area_id),
+          (checked) => this._toggleVacuumHiddenArea(a.area_id, checked)))}
       </div>
     `;
   }
@@ -2186,6 +2264,33 @@ class Simon42DashboardStrategyEditor extends LitElement {
       delete newConfig.alarm_entity;
     }
 
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  private _vacuumEntityChanged(e: Event): void {
+    if (!this._hass) return;
+    const entityId = (e.target as HTMLSelectElement).value;
+    const newConfig: Simon42StrategyConfig = { ...this._config, vacuum_entity: entityId };
+    if (!entityId) delete newConfig.vacuum_entity;
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  private _vacuumModeEntityChanged(e: Event): void {
+    if (!this._hass) return;
+    const entityId = (e.target as HTMLSelectElement).value;
+    const newConfig: Simon42StrategyConfig = { ...this._config, vacuum_mode_entity: entityId };
+    if (!entityId) delete newConfig.vacuum_mode_entity;
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  private _toggleVacuumHiddenArea(areaId: string, hidden: boolean): void {
+    const current: string[] = this._config.vacuum_hidden_areas || [];
+    const next = hidden ? [...new Set([...current, areaId])] : current.filter((id) => id !== areaId);
+    const newConfig: Simon42StrategyConfig = { ...this._config, vacuum_hidden_areas: next.length > 0 ? next : undefined };
+    if (next.length === 0) delete newConfig.vacuum_hidden_areas;
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
