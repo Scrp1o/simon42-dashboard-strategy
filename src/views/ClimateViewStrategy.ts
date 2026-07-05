@@ -6,6 +6,7 @@ import type { HomeAssistant } from '../types/homeassistant';
 import type { LovelaceViewConfig, LovelaceSectionConfig } from '../types/lovelace';
 import { Registry } from '../Registry';
 import { localize } from '../utils/localize';
+import { sectionSeparator } from '../utils/headings';
 
 class Simon42ViewClimateStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
@@ -50,12 +51,7 @@ class Simon42ViewClimateStrategy extends HTMLElement {
       sections.push({
         type: 'grid',
         cards: [
-          {
-            type: 'heading',
-            heading: `${heading} (${entities.length})`,
-            heading_style: 'title',
-            icon,
-          },
+          sectionSeparator(`${heading} (${entities.length})`, icon),
           ...entities.map((e) => ({
             type: 'tile',
             entity: e,

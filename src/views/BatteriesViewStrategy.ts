@@ -6,6 +6,7 @@ import type { HomeAssistant } from '../types/homeassistant';
 import type { LovelaceViewConfig, LovelaceSectionConfig } from '../types/lovelace';
 import { Registry } from '../Registry';
 import { localize } from '../utils/localize';
+import { sectionSeparator } from '../utils/headings';
 import { getBatteryEntities } from '../utils/entity-filter';
 
 function createBatterySection(
@@ -21,13 +22,9 @@ function createBatterySection(
   return {
     type: 'grid',
     cards: [
-      {
-        type: 'heading',
-        heading: `${emoji} ${localize('batteries.' + status)} (${rangeText}) - ${entities.length} ${
-          localize(entities.length === 1 ? 'batteries.battery_one' : 'batteries.battery_many')
-        }`,
-        heading_style: 'title',
-      },
+      sectionSeparator(`${emoji} ${localize('batteries.' + status)} (${rangeText}) - ${entities.length} ${
+        localize(entities.length === 1 ? 'batteries.battery_one' : 'batteries.battery_many')
+      }`),
       ...entities.map((e) => ({
         type: 'tile',
         entity: e,

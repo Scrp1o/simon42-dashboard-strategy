@@ -36,12 +36,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   // Only show "Übersicht" heading if clock or alarm is visible
   if (showClockCard || alarmEntity) {
-    cards.push({
-      type: 'heading',
-      heading: localize('sections.overview'),
-      heading_style: 'title',
-      icon: 'mdi:overscan',
-    });
+    cards.push(sectionSeparator(localize('sections.overview'), 'mdi:overscan'));
   }
 
   if (showClockCard) {
@@ -145,10 +140,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   // Only show summaries heading and cards if at least one is enabled
   if (summaryCards.length > 0) {
-    cards.push({
-      type: 'heading',
-      heading: localize('sections.summaries'),
-    });
+    cards.push(sectionSeparator(localize('sections.summaries')));
 
     // Layout logic: adapt to number of cards
     if (summariesColumns === 4) {
@@ -173,10 +165,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
   const favoriteEntities = (config.favorite_entities || []).filter((entityId) => hass.states[entityId] !== undefined);
 
   if (favoriteEntities.length > 0) {
-    cards.push({
-      type: 'heading',
-      heading: localize('sections.favorites'),
-    });
+    cards.push(sectionSeparator(localize('sections.favorites')));
 
     const showState = config.favorites_show_state === true;
     const hideLastChanged = config.favorites_hide_last_changed === true;
@@ -239,7 +228,7 @@ export function createCustomCardsSection(
   if (validCards.length === 0) return null;
 
   const cards: LovelaceCardConfig[] = [
-    { type: 'heading', heading: heading || localize('sections.custom_cards'), icon: icon || 'mdi:cards' },
+    sectionSeparator(heading || localize('sections.custom_cards'), icon || 'mdi:cards'),
   ];
 
   for (const card of validCards) {

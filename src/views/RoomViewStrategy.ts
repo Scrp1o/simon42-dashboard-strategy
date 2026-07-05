@@ -423,7 +423,7 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       if (cameraCards.length > 0) {
         sections.push({
           type: 'grid',
-          cards: [{ type: 'heading', heading: localize('room.cameras'), heading_style: 'title', icon: 'mdi:cctv' }, ...cameraCards],
+          cards: [sectionSeparator(localize('room.cameras'), 'mdi:cctv'), ...cameraCards],
         });
       }
     }
@@ -443,7 +443,7 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       if (entities.length === 0) return;
       sections.push({
         type: 'grid',
-        cards: [{ type: 'heading', heading, heading_style: 'title', icon }, ...entities.map(tileConfig)],
+        cards: [sectionSeparator(heading, icon), ...entities.map(tileConfig)],
       });
     };
 
@@ -580,7 +580,7 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       sections.push({
         type: 'grid',
         cards: [
-          { type: 'heading', heading: localize('room.misc'), heading_style: 'title', icon: 'mdi:dots-horizontal' },
+          sectionSeparator(localize('room.misc'), 'mdi:dots-horizontal'),
           ...miscCards,
         ],
       });
@@ -642,7 +642,7 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       sections.push({
         type: 'grid',
         cards: [
-          { type: 'heading', heading: localize('room.room_pins'), heading_style: 'title', icon: 'mdi:pin' },
+          sectionSeparator(localize('room.room_pins'), 'mdi:pin'),
           ...pinsForArea.map((e) => {
             const pinStateContent: string[] = [];
             if (dashboardConfig.room_pins_show_state === true) pinStateContent.push('state');
