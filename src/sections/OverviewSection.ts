@@ -11,6 +11,7 @@ import type { HomeAssistant } from '../types/homeassistant';
 import type { Simon42StrategyConfig, CustomCard } from '../types/strategy';
 import type { LovelaceCardConfig, LovelaceSectionConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
+import { buildVacuumModeTile } from '../utils/vacuum';
 
 export interface OverviewSectionParams {
   someSensorId: string | null;
@@ -190,6 +191,23 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
         vertical: false,
         ...(stateContent.length > 0 ? { state_content: stateContent } : {}),
       });
+    }
+  }
+
+  // Vacuum card (overview) — native multi-area cleaning via more-info
+  const vacuumEntity = config.vacuum_entity;
+  if (config.show_vacuum_card === true && vacuumEntity && hass.states[vacuumEntity]) {
+    cards.push({ type: 'heading', heading: localize('room.vacuum'), icon: 'mdi:robot-vacuum' });
+    cards.push({
+      type: 'tile',
+      entity: vacuumEntity,
+      vertical: false,
+      features: [{ type: 'vacuum-commands' }],
+      features_position: 'inline',
+    });
+    if (config.vacuum_mode_entity) {
+      const modeTile = buildVacuumModeTile(config.vacuum_mode_entity, hass);
+      if (modeTile) cards.push(modeTile);
     }
   }
 
