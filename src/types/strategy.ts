@@ -79,6 +79,12 @@ export interface Simon42StrategyConfig {
 
   // Custom badges (shown in header next to person chips)
   custom_badges?: CustomBadge[];
+
+  // Vacuum room cleaning
+  vacuum_entity?: string; // vacuum entity_id supporting clean_area (feature 16384)
+  vacuum_mode_entity?: string; // optional entity (select/input_select) for cleaning mode
+  vacuum_hidden_areas?: string[]; // area_ids excluded from the per-room clean button
+  show_vacuum_card?: boolean; // default: false — show vacuum card on overview
 }
 
 // -- Area Management --------------------------------------------------
