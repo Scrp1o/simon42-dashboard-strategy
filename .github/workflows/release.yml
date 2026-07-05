@@ -28,7 +28,9 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        # webpack-cli cannot load this repo's ESM TypeScript webpack config on
+        # the CI runner, so drive webpack via its Node API (same as local dev).
+        run: node build.local.mjs
 
       - name: Commit built dist files
         run: |
