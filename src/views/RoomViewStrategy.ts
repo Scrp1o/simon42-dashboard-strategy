@@ -15,6 +15,7 @@ import { stripAreaName, sortByLastChanged } from '../utils/name-utils';
 import { Registry } from '../Registry';
 import { timeStart, timeEnd, debugLog } from '../utils/debug';
 import { localize } from '../utils/localize';
+import { buildCleanRoomButton, buildVacuumModeTile } from '../utils/vacuum';
 import { BADGE_COLOR_MAP, getColorForEntity, isDefaultShowName, resolveShowName } from '../utils/badge-utils';
 
 // HA supported_features bitmask values
@@ -598,6 +599,26 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       name: stripAreaName(e, area, hass),
       vertical: false,
     }));
+
+    // Vacuum: "Clean this room" button (+ optional mode selector)
+    const vacuumEntity = dashboardConfig.vacuum_entity as string | undefined;
+    const vacuumHiddenAreas: string[] = dashboardConfig.vacuum_hidden_areas || [];
+    if (
+      vacuumEntity &&
+      hass.states[vacuumEntity] &&
+      !vacuumHiddenAreas.includes(area.area_id)
+    ) {
+      const vacuumCards: LovelaceCardConfig[] = [
+        { type: 'heading', heading: localize('room.vacuum'), heading_style: 'title', icon: 'mdi:robot-vacuum' },
+      ];
+      const modeEntity = dashboardConfig.vacuum_mode_entity as string | undefined;
+      if (modeEntity) {
+        const modeTile = buildVacuumModeTile(modeEntity, hass);
+        if (modeTile) vacuumCards.push(modeTile);
+      }
+      vacuumCards.push(buildCleanRoomButton(vacuumEntity, area.area_id, localize('room.vacuum_clean_here')));
+      sections.push({ type: 'grid', cards: vacuumCards });
+    }
 
     // Room Pins
     const roomPinEntities: string[] = dashboardConfig.room_pin_entities || [];
