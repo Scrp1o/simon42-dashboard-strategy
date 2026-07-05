@@ -12,6 +12,7 @@ import type { Simon42StrategyConfig, CustomCard } from '../types/strategy';
 import type { LovelaceCardConfig, LovelaceSectionConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
 import { buildVacuumModeTile } from '../utils/vacuum';
+import { sectionSeparator } from '../utils/headings';
 
 export interface OverviewSectionParams {
   someSensorId: string | null;
@@ -197,18 +198,21 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
   // Vacuum card (overview) — native multi-area cleaning via more-info
   const vacuumEntity = config.vacuum_entity;
   if (config.show_vacuum_card === true && vacuumEntity && hass.states[vacuumEntity]) {
-    cards.push({ type: 'heading', heading: localize('room.vacuum'), icon: 'mdi:robot-vacuum' });
-    cards.push({
-      type: 'tile',
-      entity: vacuumEntity,
-      vertical: false,
-      features: [{ type: 'vacuum-commands' }],
-      features_position: 'inline',
-    });
+    cards.push(sectionSeparator(localize('room.vacuum'), 'mdi:robot-vacuum'));
+    const vacuumInner: LovelaceCardConfig[] = [
+      {
+        type: 'tile',
+        entity: vacuumEntity,
+        vertical: false,
+        features: [{ type: 'vacuum-commands' }],
+        features_position: 'inline',
+      },
+    ];
     if (config.vacuum_mode_entity) {
       const modeTile = buildVacuumModeTile(config.vacuum_mode_entity, hass);
-      if (modeTile) cards.push(modeTile);
+      if (modeTile) vacuumInner.push(modeTile);
     }
+    cards.push({ type: 'custom:vertical-stack-in-card', cards: vacuumInner });
   }
 
   // If nothing is visible, skip the entire section
