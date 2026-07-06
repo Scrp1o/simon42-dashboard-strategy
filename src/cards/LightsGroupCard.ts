@@ -10,7 +10,7 @@ import { Registry } from '../Registry';
 import { trackHassUpdate } from '../utils/debug';
 import { localize } from '../utils/localize';
 import { stripAreaName } from '../utils/name-utils';
-import { sectionSeparator, type BubbleSubButton } from '../utils/headings';
+import { sectionSeparator } from '../utils/headings';
 
 declare global {
   interface Window {
@@ -70,6 +70,7 @@ class Simon42LightsGroupCard extends LitElement {
   private _headingCard: LovelaceCardElement | null = null;
   private _floorHeadingCards: Map<string, LovelaceCardElement> = new Map();
   private _prependCards: LovelaceCardElement[] = [];
+  private _actionsBuilt = false;
   private _groupContainers: Map<string, HTMLElement> = new Map();
   private _groupExpansion: Map<string, boolean> = new Map();
 
@@ -98,6 +99,26 @@ class Simon42LightsGroupCard extends LitElement {
     }
     .al-prepend:empty {
       display: none;
+    }
+    .heading-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .heading-row > #heading {
+      flex: 1;
+      min-width: 0;
+    }
+    .heading-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .heading-actions ha-icon-button {
+      --mdc-icon-button-size: 40px;
+      --mdc-icon-size: 22px;
+      color: var(--secondary-text-color);
     }
     .floor-section {
       display: flex;
@@ -385,39 +406,63 @@ class Simon42LightsGroupCard extends LitElement {
       ? `${label} (${lights.length})`
       : `${isAll ? (this._config.heading_label || localize('room.lighting')) : (isOn ? localize('lights.on') : localize('lights.off'))} (${lights.length})`;
 
-    // Batch all-on / all-off as Bubble separator sub-buttons. Each keeps its
-    // visibility condition (shown only when it would do something); Bubble
-    // ignores it harmlessly if unsupported.
-    const subButtons: BubbleSubButton[] =
-      lights.length === 0
-        ? []
-        : [
-            {
-              icon: 'mdi:lightbulb-on',
-              tap_action: {
-                action: 'perform-action',
-                perform_action: 'light.turn_on',
-                target: { entity_id: lights },
-              },
-              visibility: [{ condition: 'or', conditions: lights.map((entity) => ({ condition: 'state', entity, state: 'off' })) }],
-            },
-            {
-              icon: 'mdi:lightbulb-off',
-              tap_action: {
-                action: 'perform-action',
-                perform_action: 'light.turn_off',
-                target: { entity_id: lights },
-              },
-              visibility: [{ condition: 'or', conditions: lights.map((entity) => ({ condition: 'state', entity, state: 'on' })) }],
-            },
-          ];
-
+    // Batch all-on/all-off are rendered as native ha-icon-buttons in the
+    // heading row (see _buildHeadingActions) — NOT as Bubble sub-buttons, which
+    // had tap-gesture latency and rebuilt on every state change, causing missed
+    // taps. The separator is now just the label + icon.
     const headingIcon =
       icon ||
       this._config.heading_icon ||
       (isAll ? 'mdi:lightbulb-group' : isOn ? 'mdi:lightbulb-group' : 'mdi:lightbulb-group-off');
 
-    return sectionSeparator(heading, headingIcon, subButtons);
+    return sectionSeparator(heading, headingIcon);
+  }
+
+  /** Lights within this card's source set currently in the given state. */
+  private _sourceLightsInState(state: 'on' | 'off'): string[] {
+    const src = Array.from(this._cachedSourceIds || []);
+    return src.filter((id) => this._getState(id)?.state === state);
+  }
+
+  private _batchTurnOff = (): void => {
+    const on = this._sourceLightsInState('on');
+    if (on.length && this.hass) {
+      (this.hass as unknown as { callService: (d: string, s: string, data: unknown) => void }).callService('light', 'turn_off', { entity_id: on });
+    }
+  };
+
+  private _batchTurnOn = (): void => {
+    const off = this._sourceLightsInState('off');
+    if (off.length && this.hass) {
+      (this.hass as unknown as { callService: (d: string, s: string, data: unknown) => void }).callService('light', 'turn_on', { entity_id: off });
+    }
+  };
+
+  private _makeActionButton(icon: string, label: string, handler: () => void): HTMLElement {
+    const btn = document.createElement('ha-icon-button');
+    btn.setAttribute('label', label);
+    btn.setAttribute('title', label);
+    const ic = document.createElement('ha-icon');
+    ic.setAttribute('icon', icon);
+    btn.appendChild(ic);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handler();
+    });
+    return btn;
+  }
+
+  /** Populate the flat-mode heading action slot once with native batch buttons. */
+  private _buildHeadingActions(slot: HTMLElement): void {
+    if (this._actionsBuilt) return;
+    this._actionsBuilt = true;
+    const gt = this._config.group_type;
+    if (gt === 'on' || gt === 'all') {
+      slot.appendChild(this._makeActionButton('mdi:lightbulb-off', localize('lights.all_off'), this._batchTurnOff));
+    }
+    if (gt === 'off' || gt === 'all') {
+      slot.appendChild(this._makeActionButton('mdi:lightbulb-on', localize('lights.all_on'), this._batchTurnOn));
+    }
   }
 
   private _getOrCreateTileCard(entityId: string): LovelaceCardElement {
@@ -577,7 +622,10 @@ class Simon42LightsGroupCard extends LitElement {
 
     return html`
       <div class="lights-section">
-        <div id="heading"></div>
+        <div class="heading-row">
+          <div id="heading"></div>
+          <div class="heading-actions" id="heading-actions"></div>
+        </div>
         <div class="al-prepend" id="prepend"></div>
         <div class="light-grid" id="grid"></div>
       </div>
@@ -666,6 +714,11 @@ class Simon42LightsGroupCard extends LitElement {
       mainHeadingCard.setConfig(this._buildHeadingConfig(lights));
       mainHeadingCard.hass = this.hass;
     }
+
+    // Native batch on/off buttons in the heading row (built once, outside the
+    // churning bubble separator so taps are instant and never dropped).
+    const actionsSlot = this.shadowRoot?.getElementById('heading-actions');
+    if (actionsSlot) this._buildHeadingActions(actionsSlot);
 
     // Populate the prepend slot once — static AL toggle tiles above the lights.
     const prependSlot = this.shadowRoot?.getElementById('prepend');

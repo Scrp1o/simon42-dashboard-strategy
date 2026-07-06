@@ -7,7 +7,6 @@ import type { LovelaceViewConfig, LovelaceCardConfig, LovelaceSectionConfig } fr
 import { getVisibleAreasFromHass } from '../utils/name-utils';
 import { sectionSeparator } from '../utils/headings';
 import { buildAdaptiveLightingTiles } from '../utils/adaptive-lighting';
-import { localize } from '../utils/localize';
 
 /**
  * Builds the optional Adaptive Lighting cards for the top of the Lights
@@ -73,14 +72,10 @@ class Simon42ViewLightsStrategy extends HTMLElement {
       },
     ];
 
-    // Adaptive Lighting as its own second section (renders beside the lights),
-    // with an overall "Adaptive Lighting" heading.
+    // Adaptive Lighting as its own second section (renders beside the lights).
     const alCards = buildAdaptiveLightingCards(dashboardConfig, hass);
     if (alCards.length > 0) {
-      sections.push({
-        type: 'grid',
-        cards: [sectionSeparator(localize('views.adaptive_lighting'), 'mdi:theme-light-dark'), ...alCards],
-      });
+      sections.push({ type: 'grid', cards: alCards });
     }
 
     return { type: 'sections', sections };
