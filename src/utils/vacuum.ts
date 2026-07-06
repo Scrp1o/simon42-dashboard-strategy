@@ -23,7 +23,9 @@ export function buildCleanRoomButton(
   label: string
 ): LovelaceCardConfig {
   return {
-    type: 'button',
+    type: 'custom:bubble-card',
+    card_type: 'button',
+    button_type: 'name',
     name: label,
     icon: 'mdi:robot-vacuum',
     tap_action: {
@@ -32,7 +34,6 @@ export function buildCleanRoomButton(
       target: { entity_id: vacuumEntity },
       data: { cleaning_area_id: areaId },
     },
-    grid_options: { columns: 'full' },
   };
 }
 
