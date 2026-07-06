@@ -89,6 +89,11 @@ export interface Simon42StrategyConfig {
   vacuum_mode_entity?: string; // optional entity (select/input_select) for cleaning mode
   vacuum_hidden_areas?: string[]; // area_ids excluded from the per-room clean button
   show_vacuum_card?: boolean; // default: false — show vacuum card on overview
+
+  // Adaptive Lighting (niche — default off)
+  adaptive_lighting?: Record<string, AdaptiveLightingMapping>; // area_id -> switches
+  show_adaptive_lighting_view?: boolean; // default: false — dedicated view
+  show_adaptive_lighting_in_rooms?: boolean; // default: false — section in each room view
 }
 
 // -- Area Management --------------------------------------------------
@@ -109,6 +114,15 @@ export interface GroupOptions {
   names_visible?: string[]; // Override show_name to true (used by badges group)
   names_hidden?: string[]; // Override show_name to false (used by badges group)
   [key: string]: unknown;
+}
+
+// -- Adaptive Lighting --------------------------------------------------
+
+export interface AdaptiveLightingMapping {
+  /** The main Adaptive Lighting switch entity for this area. */
+  switch?: string;
+  /** The Adaptive Lighting "sleep mode" switch entity for this area. */
+  sleep?: string;
 }
 
 // -- Custom Views -----------------------------------------------------

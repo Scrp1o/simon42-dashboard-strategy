@@ -8,7 +8,12 @@
     "covers": "Blinds & Covers",
     "security": "Security",
     "batteries": "Batteries",
-    "climate": "Climate"
+    "climate": "Climate",
+    "adaptive_lighting": "Adaptive Lighting"
+  },
+  "adaptive_lighting": {
+    "enable": "Adaptive Lighting",
+    "sleep": "Sleep Mode"
   },
   "sections": {
     "overview": "Overview",
@@ -102,7 +107,8 @@
     "scripts": "Scripts",
     "room_pins": "Room Pins",
     "vacuum": "Vacuum",
-    "vacuum_clean_here": "Clean this room"
+    "vacuum_clean_here": "Clean this room",
+    "adaptive_lighting": "Adaptive Lighting"
   },
   "editor": {
     "section_order": "Section Order",

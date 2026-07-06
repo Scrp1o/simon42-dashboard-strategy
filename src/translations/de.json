@@ -8,7 +8,12 @@
     "covers": "Rollos & Abdeckungen",
     "security": "Sicherheit",
     "batteries": "Batterien",
-    "climate": "Klima"
+    "climate": "Klima",
+    "adaptive_lighting": "Adaptives Licht"
+  },
+  "adaptive_lighting": {
+    "enable": "Adaptives Licht",
+    "sleep": "Schlafmodus"
   },
   "sections": {
     "overview": "Übersicht",
@@ -102,7 +107,8 @@
     "scripts": "Skripte",
     "room_pins": "Raum-Pins",
     "vacuum": "Staubsauger",
-    "vacuum_clean_here": "Diesen Raum saugen"
+    "vacuum_clean_here": "Diesen Raum saugen",
+    "adaptive_lighting": "Adaptives Licht"
   },
   "editor": {
     "section_order": "Abschnitts-Reihenfolge",
