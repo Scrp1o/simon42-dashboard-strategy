@@ -142,6 +142,8 @@ export interface CustomCard {
   title?: string;
   /** Target section where this card appears (default: 'custom_cards') */
   target_section?: SectionKey;
+  /** Position within the target section: 'top' (after the clock, overview only) or 'bottom' (default, appended). */
+  target_position?: 'top' | 'bottom';
   /** Raw YAML string entered by the user in the editor */
   yaml?: string;
   /** Parsed Lovelace card config (generated from yaml) */

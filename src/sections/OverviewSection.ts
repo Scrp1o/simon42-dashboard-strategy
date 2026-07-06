@@ -19,6 +19,7 @@ export interface OverviewSectionParams {
   showSearchCard: boolean;
   config: Simon42StrategyConfig;
   hass: HomeAssistant;
+  topCustomCards?: LovelaceCardConfig[];
 }
 
 /**
@@ -26,7 +27,7 @@ export interface OverviewSectionParams {
  * optional search card, and favorites.
  */
 export function createOverviewSection(data: OverviewSectionParams): LovelaceSectionConfig | null {
-  const { showSearchCard, config, hass } = data;
+  const { showSearchCard, config, hass, topCustomCards } = data;
   const showClockCard = config.show_clock_card !== false;
 
   // Check if alarm entity is configured
@@ -74,6 +75,9 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
       },
     });
   }
+
+  // Insert point for 'top'-positioned custom cards: directly under the clock/alarm block.
+  const afterClockIndex = cards.length;
 
   // Add search card if enabled
   if (showSearchCard) {
@@ -202,6 +206,10 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
       if (modeTile) vacuumInner.push(modeTile);
     }
     cards.push({ type: 'custom:vertical-stack-in-card', cards: vacuumInner });
+  }
+
+  if (topCustomCards && topCustomCards.length > 0) {
+    cards.splice(afterClockIndex, 0, ...topCustomCards);
   }
 
   // If nothing is visible, skip the entire section

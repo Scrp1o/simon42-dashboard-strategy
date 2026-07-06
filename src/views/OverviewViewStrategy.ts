@@ -95,8 +95,15 @@ class Simon42ViewOverviewStrategy extends HTMLElement {
       customCardsBySection.set(target, list);
     }
 
+    // Split overview-targeted custom cards: 'top' render under the clock; 'bottom' (default) append at the end.
+    const overviewCustomCards = customCardsBySection.get('overview') || [];
+    const overviewTopCards = overviewCustomCards.filter((c) => c.target_position === 'top');
+    const overviewBottomCards = overviewCustomCards.filter((c) => c.target_position !== 'top');
+    customCardsBySection.set('overview', overviewBottomCards);
+    const topCustomCards = renderCustomCards(overviewTopCards);
+
     // Build sections
-    const overviewSection = createOverviewSection({ someSensorId, showSearchCard, config: dashboardConfig, hass });
+    const overviewSection = createOverviewSection({ someSensorId, showSearchCard, config: dashboardConfig, hass, topCustomCards });
     const customCardsSection = createCustomCardsSection(
       customCardsBySection.get('custom_cards') || [],
       dashboardConfig.custom_cards_heading,
