@@ -140,6 +140,10 @@ class Simon42DashboardStrategy extends HTMLElement {
       }
     }
 
+    const { buildAdaptiveLightingView } = await import('./views/AdaptiveLightingView');
+    const alView = buildAdaptiveLightingView(config, hass, visibleAreas);
+    if (alView) views.push(alView);
+
     t(`generate() done — ${views.length} views`);
 
     return {
