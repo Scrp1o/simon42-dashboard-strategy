@@ -1829,6 +1829,18 @@ class Simon42DashboardStrategyEditor extends LitElement {
               `)}
             </select>
           </div>
+          <div class="custom-card-target">
+            <label>${localize('editor.target_position')}:</label>
+            <select
+              @change=${(e: Event) => this._updateCustomCardField(index, 'target_position', (e.target as HTMLSelectElement).value)}>
+              <option value="bottom" ?selected=${(card.target_position || 'bottom') === 'bottom'}>
+                ${localize('editor.target_position_bottom')}
+              </option>
+              <option value="top" ?selected=${card.target_position === 'top'}>
+                ${localize('editor.target_position_top')}
+              </option>
+            </select>
+          </div>
           <textarea rows="6" placeholder=${localize('editor.yaml_placeholder')}
             .value=${card.yaml || ''}
             style="width: 100%;"
