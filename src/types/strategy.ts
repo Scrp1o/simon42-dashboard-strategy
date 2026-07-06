@@ -64,6 +64,10 @@ export interface Simon42StrategyConfig {
   favorite_entities?: string[];
   room_pin_entities?: string[];
 
+  // Sleep-state person chips (niche — default off)
+  show_sleep_state?: boolean; // default: false
+  person_sleep_sensors?: Record<string, string>; // person entity_id -> binary_sensor entity_id
+
   // Area management
   use_default_area_sort?: boolean; // default: false
   areas_display?: AreasDisplay;
