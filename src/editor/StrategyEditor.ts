@@ -1662,7 +1662,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
   private _renderAdaptiveLightingSection(): TemplateResult {
     const mapping = this._config.adaptive_lighting || {};
-    const showView = this._config.show_adaptive_lighting_view === true;
+    const showInLights = this._config.show_adaptive_lighting_in_lights === true;
     const showRooms = this._config.show_adaptive_lighting_in_rooms === true;
     const switches = this._getSwitchEntities();
     const areas = this._hass ? Object.values(this._hass.areas) : [];
@@ -1672,8 +1672,8 @@ class Simon42DashboardStrategyEditor extends LitElement {
         <div class="section-title">${localize('editor.section_adaptive_lighting')}</div>
         <div class="description">${localize('editor.adaptive_lighting_desc')}</div>
 
-        ${this._renderCheckbox('al-show-view', localize('editor.show_adaptive_lighting_view'), showView,
-          (checked) => this._toggleChanged('show_adaptive_lighting_view', checked, false))}
+        ${this._renderCheckbox('al-show-in-lights', localize('editor.show_adaptive_lighting_in_lights'), showInLights,
+          (checked) => this._toggleChanged('show_adaptive_lighting_in_lights', checked, false))}
         ${this._renderCheckbox('al-show-rooms', localize('editor.show_adaptive_lighting_in_rooms'), showRooms,
           (checked) => this._toggleChanged('show_adaptive_lighting_in_rooms', checked, false))}
 

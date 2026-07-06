@@ -9,6 +9,7 @@ import { Registry } from '../Registry';
 import { trackHassUpdate } from '../utils/debug';
 import { localize } from '../utils/localize';
 import { stripAreaName } from '../utils/name-utils';
+import { sectionSeparator, type BubbleSubButton } from '../utils/headings';
 
 declare global {
   interface Window {
@@ -170,6 +171,9 @@ class Simon42LightsGroupCard extends LitElement {
 
   private _propagateHass(hass: HomeAssistant): void {
     if (this._headingCard) this._headingCard.hass = hass;
+    for (const card of this._floorHeadingCards.values()) {
+      card.hass = hass;
+    }
     for (const card of this._tileCards.values()) {
       card.hass = hass;
     }
@@ -364,14 +368,15 @@ class Simon42LightsGroupCard extends LitElement {
       ? `${label} (${lights.length})`
       : `${isAll ? (this._config.heading_label || localize('room.lighting')) : (isOn ? localize('lights.on') : localize('lights.off'))} (${lights.length})`;
 
-    const badges =
+    // Batch all-on / all-off as Bubble separator sub-buttons. Each keeps its
+    // visibility condition (shown only when it would do something); Bubble
+    // ignores it harmlessly if unsupported.
+    const subButtons: BubbleSubButton[] =
       lights.length === 0
         ? []
         : [
             {
-              type: 'button',
               icon: 'mdi:lightbulb-on',
-              text: localize('lights.all_on'),
               tap_action: {
                 action: 'perform-action',
                 perform_action: 'light.turn_on',
@@ -380,9 +385,7 @@ class Simon42LightsGroupCard extends LitElement {
               visibility: [{ condition: 'or', conditions: lights.map((entity) => ({ condition: 'state', entity, state: 'off' })) }],
             },
             {
-              type: 'button',
               icon: 'mdi:lightbulb-off',
-              text: localize('lights.all_off'),
               tap_action: {
                 action: 'perform-action',
                 perform_action: 'light.turn_off',
@@ -392,15 +395,12 @@ class Simon42LightsGroupCard extends LitElement {
             },
           ];
 
-    return {
-      type: 'heading',
-      heading,
-      icon:
-        icon ||
-        this._config.heading_icon ||
-        (isAll ? 'mdi:lightbulb-group' : isOn ? 'mdi:lightbulb-group' : 'mdi:lightbulb-group-off'),
-      badges,
-    };
+    const headingIcon =
+      icon ||
+      this._config.heading_icon ||
+      (isAll ? 'mdi:lightbulb-group' : isOn ? 'mdi:lightbulb-group' : 'mdi:lightbulb-group-off');
+
+    return sectionSeparator(heading, headingIcon, subButtons);
   }
 
   private _getOrCreateTileCard(entityId: string): LovelaceCardElement {
@@ -569,7 +569,7 @@ class Simon42LightsGroupCard extends LitElement {
   private _getOrCreateFloorHeadingCard(key: string): LovelaceCardElement {
     let card = this._floorHeadingCards.get(key);
     if (card) return card;
-    card = document.createElement('hui-heading-card') as LovelaceCardElement;
+    card = document.createElement('bubble-card') as LovelaceCardElement;
     this._floorHeadingCards.set(key, card);
     return card;
   }
@@ -592,12 +592,14 @@ class Simon42LightsGroupCard extends LitElement {
       const headingSlot = this.shadowRoot?.getElementById('heading');
       if (headingSlot) {
         if (!this._headingCard) {
-          this._headingCard = document.createElement('hui-heading-card') as LovelaceCardElement;
+          this._headingCard = document.createElement('bubble-card') as LovelaceCardElement;
         }
         const mainHeadingCard = this._headingCard;
         headingSlot.appendChild(mainHeadingCard);
-        mainHeadingCard.hass = this.hass;
+        // setConfig BEFORE hass: bubble-card's `set hass` reads its config
+        // immediately and throws if configless (hui-heading-card tolerated it).
         mainHeadingCard.setConfig(this._buildHeadingConfig(lights));
+        mainHeadingCard.hass = this.hass;
       }
 
       // Reconcile per-floor sections
@@ -608,8 +610,8 @@ class Simon42LightsGroupCard extends LitElement {
         if (floorHeadingSlot) {
           const headingCard = this._getOrCreateFloorHeadingCard(key);
           if (!headingCard.parentNode) floorHeadingSlot.appendChild(headingCard);
-          headingCard.hass = this.hass;
           headingCard.setConfig(this._buildHeadingConfig(group.lights, group.floorName, group.floorIcon));
+          headingCard.hass = this.hass;
         }
 
         const grid = this.shadowRoot?.getElementById(`floor-grid-${key}`);
@@ -639,12 +641,12 @@ class Simon42LightsGroupCard extends LitElement {
     const headingSlot = this.shadowRoot?.getElementById('heading');
     if (headingSlot) {
       if (!this._headingCard) {
-        this._headingCard = document.createElement('hui-heading-card') as LovelaceCardElement;
+        this._headingCard = document.createElement('bubble-card') as LovelaceCardElement;
       }
       const mainHeadingCard = this._headingCard;
       headingSlot.appendChild(mainHeadingCard);
-      mainHeadingCard.hass = this.hass;
       mainHeadingCard.setConfig(this._buildHeadingConfig(lights));
+      mainHeadingCard.hass = this.hass;
     }
 
     const grid = this.shadowRoot?.getElementById('grid');

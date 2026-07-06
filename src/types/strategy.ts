@@ -92,7 +92,7 @@ export interface Simon42StrategyConfig {
 
   // Adaptive Lighting (niche — default off)
   adaptive_lighting?: Record<string, AdaptiveLightingMapping>; // area_id -> switches
-  show_adaptive_lighting_view?: boolean; // default: false — dedicated view
+  show_adaptive_lighting_in_lights?: boolean; // default: false — AL section in the Lights view
   show_adaptive_lighting_in_rooms?: boolean; // default: false — section in each room view
 }
 
