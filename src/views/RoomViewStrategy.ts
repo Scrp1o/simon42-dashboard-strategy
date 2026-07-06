@@ -16,6 +16,7 @@ import { Registry } from '../Registry';
 import { timeStart, timeEnd, debugLog } from '../utils/debug';
 import { localize } from '../utils/localize';
 import { buildCleanRoomButton, buildVacuumModeTile } from '../utils/vacuum';
+import { buildAdaptiveLightingButtons } from '../utils/adaptive-lighting';
 import { sectionSeparator } from '../utils/headings';
 import { BADGE_COLOR_MAP, getColorForEntity, isDefaultShowName, resolveShowName } from '../utils/badge-utils';
 
@@ -623,6 +624,23 @@ class Simon42ViewRoomStrategy extends HTMLElement {
           { type: 'custom:vertical-stack-in-card', cards: vacuumInner },
         ],
       });
+    }
+
+    // Adaptive Lighting: two toggle-buttons for this area (opt-in)
+    if (dashboardConfig.show_adaptive_lighting_in_rooms === true) {
+      const alMapping = dashboardConfig.adaptive_lighting?.[area.area_id];
+      if (alMapping) {
+        const alButtons = buildAdaptiveLightingButtons(alMapping, hass);
+        if (alButtons.length > 0) {
+          sections.push({
+            type: 'grid',
+            cards: [
+              sectionSeparator(localize('room.adaptive_lighting'), 'mdi:theme-light-dark'),
+              { type: 'custom:vertical-stack-in-card', cards: alButtons },
+            ],
+          });
+        }
+      }
     }
 
     // Room Pins
