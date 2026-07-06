@@ -7,6 +7,7 @@ import type { LovelaceViewConfig, LovelaceCardConfig, LovelaceSectionConfig } fr
 import { getVisibleAreasFromHass } from '../utils/name-utils';
 import { sectionSeparator } from '../utils/headings';
 import { buildAdaptiveLightingTiles } from '../utils/adaptive-lighting';
+import { localize } from '../utils/localize';
 
 /**
  * Builds the optional Adaptive Lighting cards for the top of the Lights
@@ -47,32 +48,42 @@ class Simon42ViewLightsStrategy extends HTMLElement {
     const groupByFloors = dashboardConfig.group_lights_by_floors === true;
     const nestedGroups = dashboardConfig.nested_light_groups === true;
 
+    // Lights are primary — their section comes first.
+    const sections: LovelaceSectionConfig[] = [
+      {
+        type: 'grid',
+        cards: [
+          {
+            type: 'custom:simon42-lights-group-card',
+            entities: config.entities,
+            config: config.config,
+            group_type: 'on',
+            group_by_floors: groupByFloors,
+            nested_groups: nestedGroups,
+          },
+          {
+            type: 'custom:simon42-lights-group-card',
+            entities: config.entities,
+            config: config.config,
+            group_type: 'off',
+            group_by_floors: groupByFloors,
+            nested_groups: nestedGroups,
+          },
+        ],
+      },
+    ];
+
+    // Adaptive Lighting as its own second section (renders beside the lights),
+    // with an overall "Adaptive Lighting" heading.
     const alCards = buildAdaptiveLightingCards(dashboardConfig, hass);
+    if (alCards.length > 0) {
+      sections.push({
+        type: 'grid',
+        cards: [sectionSeparator(localize('views.adaptive_lighting'), 'mdi:theme-light-dark'), ...alCards],
+      });
+    }
 
-    const section: LovelaceSectionConfig = {
-      type: 'grid',
-      cards: [
-        ...alCards,
-        {
-          type: 'custom:simon42-lights-group-card',
-          entities: config.entities,
-          config: config.config,
-          group_type: 'on',
-          group_by_floors: groupByFloors,
-          nested_groups: nestedGroups,
-        },
-        {
-          type: 'custom:simon42-lights-group-card',
-          entities: config.entities,
-          config: config.config,
-          group_type: 'off',
-          group_by_floors: groupByFloors,
-          nested_groups: nestedGroups,
-        },
-      ],
-    };
-
-    return { type: 'sections', sections: [section] };
+    return { type: 'sections', sections };
   }
 }
 

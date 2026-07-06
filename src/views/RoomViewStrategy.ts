@@ -448,6 +448,14 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       });
     };
 
+    // Adaptive Lighting tiles (opt-in) render at the top of the Lighting group,
+    // above the light entities.
+    let alPrependCards: LovelaceCardConfig[] = [];
+    if (dashboardConfig.show_adaptive_lighting_in_rooms === true) {
+      const alMapping = dashboardConfig.adaptive_lighting?.[area.area_id];
+      if (alMapping) alPrependCards = buildAdaptiveLightingTiles(alMapping, hass);
+    }
+
     if (roomEntities.lights.length > 0) {
       sections.push({
         type: 'grid',
@@ -461,6 +469,7 @@ class Simon42ViewRoomStrategy extends HTMLElement {
             area,
             default_expanded: true,
             nested_groups: dashboardConfig.nested_light_groups === true,
+            ...(alPrependCards.length > 0 ? { prepend_cards: alPrependCards } : {}),
           },
         ],
       });
@@ -626,22 +635,8 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       });
     }
 
-    // Adaptive Lighting: two native toggle tiles for this area (opt-in)
-    if (dashboardConfig.show_adaptive_lighting_in_rooms === true) {
-      const alMapping = dashboardConfig.adaptive_lighting?.[area.area_id];
-      if (alMapping) {
-        const alTiles = buildAdaptiveLightingTiles(alMapping, hass);
-        if (alTiles.length > 0) {
-          sections.push({
-            type: 'grid',
-            cards: [
-              sectionSeparator(localize('room.adaptive_lighting'), 'mdi:theme-light-dark'),
-              { type: 'grid', columns: 2, square: false, cards: alTiles },
-            ],
-          });
-        }
-      }
-    }
+    // (Adaptive Lighting toggles now render inside the Lighting group above the
+    //  lights — see prepend_cards on the lights-group-card above.)
 
     // Room Pins
     const roomPinEntities: string[] = dashboardConfig.room_pin_entities || [];

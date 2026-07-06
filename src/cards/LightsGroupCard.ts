@@ -5,6 +5,7 @@
 import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import type { HomeAssistant, HassEntity } from '../types/homeassistant';
 import type { AreaRegistryEntry } from '../types/registries';
+import type { LovelaceCardConfig } from '../types/lovelace';
 import { Registry } from '../Registry';
 import { trackHassUpdate } from '../utils/debug';
 import { localize } from '../utils/localize';
@@ -28,6 +29,10 @@ interface LightsGroupConfig {
   heading_icon?: string;
   area?: AreaRegistryEntry;
   default_expanded?: boolean;
+  /** Static cards rendered at the top of the light grid, above the light tiles
+   *  (used in room views to place the area's Adaptive Lighting toggles inside
+   *  the Lighting group). Flat mode only. */
+  prepend_cards?: LovelaceCardConfig[];
 }
 
 interface FloorGroup {
@@ -64,6 +69,7 @@ class Simon42LightsGroupCard extends LitElement {
   private _tileCards: Map<string, LovelaceCardElement> = new Map();
   private _headingCard: LovelaceCardElement | null = null;
   private _floorHeadingCards: Map<string, LovelaceCardElement> = new Map();
+  private _prependCards: LovelaceCardElement[] = [];
   private _groupContainers: Map<string, HTMLElement> = new Map();
   private _groupExpansion: Map<string, boolean> = new Map();
 
@@ -84,6 +90,14 @@ class Simon42LightsGroupCard extends LitElement {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 8px;
+    }
+    .al-prepend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .al-prepend:empty {
+      display: none;
     }
     .floor-section {
       display: flex;
@@ -172,6 +186,9 @@ class Simon42LightsGroupCard extends LitElement {
   private _propagateHass(hass: HomeAssistant): void {
     if (this._headingCard) this._headingCard.hass = hass;
     for (const card of this._floorHeadingCards.values()) {
+      card.hass = hass;
+    }
+    for (const card of this._prependCards) {
       card.hass = hass;
     }
     for (const card of this._tileCards.values()) {
@@ -561,6 +578,7 @@ class Simon42LightsGroupCard extends LitElement {
     return html`
       <div class="lights-section">
         <div id="heading"></div>
+        <div class="al-prepend" id="prepend"></div>
         <div class="light-grid" id="grid"></div>
       </div>
     `;
@@ -647,6 +665,18 @@ class Simon42LightsGroupCard extends LitElement {
       headingSlot.appendChild(mainHeadingCard);
       mainHeadingCard.setConfig(this._buildHeadingConfig(lights));
       mainHeadingCard.hass = this.hass;
+    }
+
+    // Populate the prepend slot once — static AL toggle tiles above the lights.
+    const prependSlot = this.shadowRoot?.getElementById('prepend');
+    if (prependSlot && this._config.prepend_cards?.length && this._prependCards.length === 0) {
+      for (const cardConfig of this._config.prepend_cards) {
+        const el = document.createElement('hui-tile-card') as LovelaceCardElement;
+        el.setConfig(cardConfig as Record<string, unknown>);
+        el.hass = this.hass;
+        prependSlot.appendChild(el);
+        this._prependCards.push(el);
+      }
     }
 
     const grid = this.shadowRoot?.getElementById('grid');
