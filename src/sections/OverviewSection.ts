@@ -206,6 +206,23 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
       if (modeTile) vacuumInner.push(modeTile);
     }
     cards.push({ type: 'custom:vertical-stack-in-card', cards: vacuumInner });
+    // Show which room is currently being cleaned (needs the target helper set by
+    // the room-clean script). Standalone conditional card so it hides/shows live.
+    const vacuumTarget = config.vacuum_target_helper;
+    if (vacuumTarget) {
+      cards.push({
+        type: 'conditional',
+        conditions: [{ entity: vacuumEntity, state: 'cleaning' }],
+        card: {
+          type: 'custom:mushroom-template-card',
+          icon: 'mdi:broom',
+          icon_color: 'green',
+          primary: localize('room.vacuum_currently'),
+          secondary: `{{ area_name(states('${vacuumTarget}')) or '—' }}`,
+          layout: 'horizontal',
+        },
+      });
+    }
   }
 
   if (topCustomCards && topCustomCards.length > 0) {

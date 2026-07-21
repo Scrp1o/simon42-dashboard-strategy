@@ -10,7 +10,7 @@ import type { HomeAssistant } from './types/homeassistant';
 import type { Simon42StrategyConfig } from './types/strategy';
 import type { LovelaceConfig, LovelaceViewConfig } from './types/lovelace';
 
-const STRATEGY_VERSION = '1.6.0';
+const STRATEGY_VERSION = '1.7.0';
 
 const DEBUG = new URLSearchParams(window.location.search).has('s42_debug');
 const T0 = performance.now();
@@ -30,6 +30,7 @@ const modulesPromise = Promise.all([
   import('./views/SecurityViewStrategy'),
   import('./views/BatteriesViewStrategy'),
   import('./views/ClimateViewStrategy'),
+  import('./views/PersonsViewStrategy'),
   import('./views/RoomViewStrategy'),
 ]);
 
@@ -62,6 +63,7 @@ class Simon42DashboardStrategy extends HTMLElement {
     const showSecurity = config.show_security_summary !== false;
     const showBatteries = config.show_battery_summary !== false;
     const showClimate = config.show_climate_summary === true;
+    const showPersons = config.show_persons_view === true;
 
     // Pre-resolve ALL views upfront (like HA's Home Panel does)
     const overviewConfig = await getStrategy('ll-strategy-simon42-view-overview').generate(
@@ -83,6 +85,9 @@ class Simon42DashboardStrategy extends HTMLElement {
         resolve: () => getStrategy('ll-strategy-simon42-view-batteries').generate({ config }, hass) },
       { enabled: showClimate, title: localize('views.climate'), path: 'climate', icon: 'mdi:thermostat',
         resolve: () => getStrategy('ll-strategy-simon42-view-climate').generate({ config }, hass) },
+      { enabled: showPersons, title: localize('views.persons'), path: 'persons', icon: 'mdi:account-group',
+        subview: false, // no summary card opens it — keep it a top-level tab
+        resolve: () => getStrategy('ll-strategy-simon42-view-persons').generate({ config }, hass) },
     ];
 
     const enabledDefs = utilityViewDefs.filter((d) => d.enabled);
@@ -116,7 +121,7 @@ class Simon42DashboardStrategy extends HTMLElement {
         title: def.title,
         path: def.path,
         icon: def.icon,
-        subview: !showSummaryViews,
+        subview: (def as { subview?: boolean }).subview ?? !showSummaryViews,
         ...utilityConfigs[i],
       })),
       ...visibleAreas.map((area, i) => ({

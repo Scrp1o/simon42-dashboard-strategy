@@ -13,6 +13,8 @@ class Simon42ViewClimateStrategy extends HTMLElement {
     // Ensure Registry is initialized (idempotent — no-op if already done)
     Registry.initialize(hass, config.config || {});
 
+    const userConfig = config.config || {};
+
     const climateIds = Registry.getVisibleEntityIdsForDomain('climate').filter(
       (id) => hass.states[id] !== undefined
     );
@@ -41,6 +43,15 @@ class Simon42ViewClimateStrategy extends HTMLElement {
     }
 
     const sections: LovelaceSectionConfig[] = [];
+
+    // Personal-fork feature: prepend user-provided cards (from dashboard config)
+    // above the generated climate tiles. Keeps entity IDs out of the source.
+    const headerCards = Array.isArray(userConfig.climate_header_cards)
+      ? userConfig.climate_header_cards
+      : [];
+    if (headerCards.length > 0) {
+      sections.push({ type: 'grid', cards: headerCards });
+    }
 
     const buildSection = (
       entities: string[],

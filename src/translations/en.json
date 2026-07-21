@@ -9,6 +9,10 @@
     "security": "Security",
     "batteries": "Batteries",
     "climate": "Climate",
+    "persons": "People",
+    "sleep_probability": "Sleep probability",
+    "asleep": "Asleep",
+    "awake": "Awake",
     "adaptive_lighting": "Adaptive Lighting"
   },
   "adaptive_lighting": {
@@ -108,6 +112,9 @@
     "room_pins": "Room Pins",
     "vacuum": "Vacuum",
     "vacuum_clean_here": "Clean this room",
+    "vacuum_cleaning_here": "Cleaning this room now",
+    "vacuum_busy_other": "Vacuum busy in another room",
+    "vacuum_currently": "Currently cleaning",
     "adaptive_lighting": "Adaptive Lighting"
   },
   "editor": {

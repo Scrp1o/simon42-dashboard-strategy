@@ -37,6 +37,7 @@ export interface Simon42StrategyConfig {
   show_security_summary?: boolean; // default: true
   show_battery_summary?: boolean; // default: true
   show_climate_summary?: boolean; // default: false
+  show_persons_view?: boolean; // default: false — auto-populated persons/phones view (people + their devices)
   hide_mobile_app_batteries?: boolean; // default: false
   battery_critical_threshold?: number; // default: 20
   battery_low_threshold?: number; // default: 50
@@ -76,6 +77,11 @@ export interface Simon42StrategyConfig {
   // Custom views
   custom_views?: CustomView[];
 
+  // Climate view — raw Lovelace cards prepended (as a grid section) above the
+  // generated climate/thermostat tiles. Cards live in dashboard config, so the
+  // strategy stays generic (no hardcoded entities). Personal-fork feature.
+  climate_header_cards?: any[];
+
   // Custom cards (shown as own section on overview)
   custom_cards?: CustomCard[];
   custom_cards_heading?: string;
@@ -89,6 +95,8 @@ export interface Simon42StrategyConfig {
   vacuum_mode_entity?: string; // optional entity (select/input_select) for cleaning mode
   vacuum_hidden_areas?: string[]; // area_ids excluded from the per-room clean button
   show_vacuum_card?: boolean; // default: false — show vacuum card on overview
+  vacuum_clean_script?: string; // optional script called with {area_id} instead of vacuum.clean_area — lets you record which room was started (room tracking)
+  vacuum_target_helper?: string; // input_text holding the area_id currently being cleaned (set by vacuum_clean_script) — drives per-room "cleaning here / busy elsewhere" status
 
   // Adaptive Lighting (niche — default off)
   adaptive_lighting?: Record<string, AdaptiveLightingMapping>; // area_id -> switches

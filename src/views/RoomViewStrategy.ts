@@ -15,7 +15,7 @@ import { stripAreaName, sortByLastChanged } from '../utils/name-utils';
 import { Registry } from '../Registry';
 import { timeStart, timeEnd, debugLog } from '../utils/debug';
 import { localize } from '../utils/localize';
-import { buildCleanRoomButton, buildVacuumModeTile } from '../utils/vacuum';
+import { buildCleanRoomButton, buildVacuumModeTile, buildVacuumRoomStatus } from '../utils/vacuum';
 import { buildAdaptiveLightingTiles } from '../utils/adaptive-lighting';
 import { sectionSeparator } from '../utils/headings';
 import { BADGE_COLOR_MAP, getColorForEntity, isDefaultShowName, resolveShowName } from '../utils/badge-utils';
@@ -625,12 +625,21 @@ class Simon42ViewRoomStrategy extends HTMLElement {
         const modeTile = buildVacuumModeTile(modeEntity, hass);
         if (modeTile) vacuumInner.push(modeTile);
       }
-      vacuumInner.push(buildCleanRoomButton(vacuumEntity, area.area_id, localize('room.vacuum_clean_here')));
+      const cleanScript = dashboardConfig.vacuum_clean_script as string | undefined;
+      const targetHelper = dashboardConfig.vacuum_target_helper as string | undefined;
+      vacuumInner.push(
+        buildCleanRoomButton(vacuumEntity, area.area_id, localize('room.vacuum_clean_here'), cleanScript)
+      );
+      const vacuumStatus = buildVacuumRoomStatus(vacuumEntity, area.area_id, targetHelper, {
+        here: localize('room.vacuum_cleaning_here'),
+        other: localize('room.vacuum_busy_other'),
+      });
       sections.push({
         type: 'grid',
         cards: [
           sectionSeparator(localize('room.vacuum'), 'mdi:robot-vacuum'),
           { type: 'custom:vertical-stack-in-card', cards: vacuumInner },
+          ...vacuumStatus,
         ],
       });
     }
