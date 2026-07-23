@@ -119,7 +119,17 @@ class Simon42ViewPersonsStrategy extends HTMLElement {
             // when awake). Falls back to the plain asleep indicator icon if absent.
             const durSensor = `sensor.${asleep.split('.')[1]}_dauer`;
             if (hass.states[durSensor]) {
-              sleepSub.push({ entity: durSensor, show_state: true, show_name: false });
+              // Label shows the "asleep for" duration, but TAP must still open the
+              // asleep binary_sensor's detail (not the duration helper). Override the
+              // sub-button's tap_action to point at the asleep entity; the duration
+              // helper's own more-info moves to hold.
+              sleepSub.push({
+                entity: durSensor,
+                show_state: true,
+                show_name: false,
+                tap_action: { action: 'more-info', entity: asleep },
+                hold_action: { action: 'more-info' },
+              });
             } else {
               sleepSub.push({ entity: asleep, show_state: false, show_name: false });
             }
