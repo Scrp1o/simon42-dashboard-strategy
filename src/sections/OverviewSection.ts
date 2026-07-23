@@ -76,6 +76,24 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
     });
   }
 
+  // Running timer directly under the clock (opt-in via overview_timer_entity):
+  // a native tile showing the live countdown; tap opens the timer controls.
+  // Wrapped in a conditional so it only appears while a timer is active.
+  const timerEntity = config.overview_timer_entity;
+  if (timerEntity && hass.states[timerEntity]) {
+    cards.push({
+      type: 'conditional',
+      conditions: [{ entity: timerEntity, state: 'active' }],
+      card: {
+        type: 'tile',
+        entity: timerEntity,
+        icon: 'mdi:timer-sand',
+        vertical: false,
+      },
+      grid_options: { columns: 'full' },
+    });
+  }
+
   // Insert point for 'top'-positioned custom cards: directly under the clock/alarm block.
   const afterClockIndex = cards.length;
 

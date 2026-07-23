@@ -32,10 +32,8 @@ class Simon42ViewPersonsStrategy extends HTMLElement {
     const personIds = Object.keys(hass.states)
       .filter((id) => id.startsWith('person.'))
       .sort((a, b) => {
-        // Home first, then alphabetically by name.
-        const ah = hass.states[a].state === 'home' ? 0 : 1;
-        const bh = hass.states[b].state === 'home' ? 0 : 1;
-        if (ah !== bh) return ah - bh;
+        // Stable alphabetical order by person name (independent of home/away
+        // state, so the order never reshuffles when someone leaves/arrives).
         const an = (hass.states[a].attributes?.friendly_name as string) || a;
         const bn = (hass.states[b].attributes?.friendly_name as string) || b;
         return an.localeCompare(bn);
@@ -80,6 +78,7 @@ class Simon42ViewPersonsStrategy extends HTMLElement {
         const bl = `sensor.${base}_battery_level`;
         const bs = `sensor.${base}_battery_state`;
         const ct = `sensor.${base}_charger_type`;
+        const na = `sensor.${base}_next_alarm`;
         if (hass.states[bl]) subMain.push({ entity: bl, show_state: true });
         if (hass.states[bs]) subMain.push({ entity: bs, show_state: true });
         if (hass.states[ct]) subMain.push({ entity: ct, show_state: true });
@@ -95,16 +94,35 @@ class Simon42ViewPersonsStrategy extends HTMLElement {
           sub_button: { main: subMain, bottom: [] },
         });
 
+        // Companion-app "Next alarm" (timestamp sensor) on its own labeled row
+        // below the phone — only when this phone has an alarm set. Keeps the
+        // device row from getting cramped by the wide date/time value.
+        if (hass.states[na]) {
+          cards.push({
+            type: 'custom:bubble-card',
+            card_type: 'separator',
+            name: localize('views.next_alarm'),
+            icon: 'mdi:alarm',
+            sub_button: { main: [{ entity: na, show_state: true }], bottom: [] },
+          });
+        }
+
         // Sleep-confidence graph (Sleep as Android via the companion app)
         const sc = `sensor.${base}_sleep_confidence`;
         if (hass.states[sc]) {
           const sleepSub: Array<Record<string, unknown>> = [];
           const asleep = sleepSensors[pid];
-          // Icon-only status — no on/off text; the icon colors by state
-          // (grey = awake / off, accent = asleep / on). Bubble-card doesn't
-          // evaluate Jinja in a sub-button name, so custom text isn't available.
           if (asleep && hass.states[asleep]) {
-            sleepSub.push({ entity: asleep, show_state: false, show_name: false });
+            // Single sub-button: prefer the companion "asleep for" Template Helper
+            // (sensor.<asleep object_id>_dauer) — its templated icon indicates sleep
+            // state and its state shows the running duration ("2 h 10 min" / blank
+            // when awake). Falls back to the plain asleep indicator icon if absent.
+            const durSensor = `sensor.${asleep.split('.')[1]}_dauer`;
+            if (hass.states[durSensor]) {
+              sleepSub.push({ entity: durSensor, show_state: true, show_name: false });
+            } else {
+              sleepSub.push({ entity: asleep, show_state: false, show_name: false });
+            }
           }
           cards.push({
             type: 'custom:bubble-card',

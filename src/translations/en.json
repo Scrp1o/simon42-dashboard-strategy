@@ -11,6 +11,8 @@
     "climate": "Climate",
     "persons": "People",
     "sleep_probability": "Sleep probability",
+  "next_alarm": "Next alarm",
+  "asleep_since": "Asleep for",
     "asleep": "Asleep",
     "awake": "Awake",
     "adaptive_lighting": "Adaptive Lighting"

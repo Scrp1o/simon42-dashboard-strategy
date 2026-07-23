@@ -11,6 +11,8 @@
     "climate": "Klima",
     "persons": "Personen",
     "sleep_probability": "Schlafwahrscheinlichkeit",
+  "next_alarm": "Nächster Wecker",
+  "asleep_since": "Schläft seit",
     "asleep": "Schläft",
     "awake": "Wach",
     "adaptive_lighting": "Adaptives Licht"

@@ -87,6 +87,10 @@ class Simon42ViewRoomStrategy extends HTMLElement {
     // (no hidden, no_dboard, config/diagnostic, config-hidden)
     const visibleEntities = Registry.getVisibleEntitiesForArea(area.area_id);
 
+    // Buttons are opt-in per entity via the `show_dboard` label — collected here
+    // and rendered as tiles in the Misc group (e.g. Wake-on-LAN).
+    const buttonsToShow: string[] = [];
+
     for (const entity of visibleEntities) {
       const entityId = entity.entity_id;
 
@@ -131,6 +135,10 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       }
       if (domain === 'switch') {
         roomEntities.switches.push(entityId);
+        continue;
+      }
+      if (domain === 'button') {
+        if (entity.labels?.includes('show_dboard')) buttonsToShow.push(entityId);
         continue;
       }
       if (domain === 'lock' && dashboardConfig.show_locks_in_rooms) {
@@ -570,14 +578,70 @@ class Simon42ViewRoomStrategy extends HTMLElement {
         state_content: 'last_changed',
       });
     }
-    for (const e of roomEntities.switches)
-      miscCards.push({
+    const showSwitchPower = dashboardConfig.show_switch_power === true;
+    const poweredSwitchCards: LovelaceCardConfig[] = [];
+    for (const e of roomEntities.switches) {
+      const switchTile: LovelaceCardConfig = {
         type: 'tile',
         entity: e,
         name: stripAreaName(e, area, hass),
         vertical: false,
         state_content: 'last_changed',
+      };
+      // Opt-in `no_toggle` label: drop the one-tap toggle (tap opens more-info
+      // instead) so plugs like the fridge/PC can't be switched off by accident —
+      // they still show, still show power, and can be toggled from the dialog.
+      // The tile's ICON has its own action (defaults to toggle for switches), so
+      // both tap_action AND icon_tap_action must be overridden.
+      if (Registry.getEntity(e)?.labels?.includes('no_toggle')) {
+        switchTile.tap_action = { action: 'more-info' };
+        switchTile.icon_tap_action = { action: 'more-info' };
+      }
+      // Opt-in: pair the switch with its device's power sensor so smart-plug
+      // wattage shows next to the toggle in the room view.
+      let powerSensor: string | undefined;
+      if (showSwitchPower) {
+        const entry = Registry.getEntity(e);
+        if (entry?.device_id) {
+          powerSensor = Registry.getEntityIdsForDevice(entry.device_id).find(
+            (id) =>
+              id.startsWith('sensor.') &&
+              hass.states[id] &&
+              (hass.states[id].attributes?.device_class === 'power' ||
+                hass.states[id].attributes?.unit_of_measurement === 'W') &&
+              !Registry.isEntityExcluded(id)
+          );
+        }
+      }
+      if (powerSensor) {
+        poweredSwitchCards.push({
+          type: 'horizontal-stack',
+          cards: [
+            switchTile,
+            {
+              type: 'tile',
+              entity: powerSensor,
+              name: stripAreaName(powerSensor, area, hass),
+              vertical: false,
+              state_content: 'state',
+            },
+          ],
+        });
+      } else {
+        miscCards.push(switchTile);
+      }
+    }
+
+    // show_dboard buttons — tap presses the button (e.g. Wake-on-LAN).
+    for (const e of buttonsToShow) {
+      miscCards.push({
+        type: 'tile',
+        entity: e,
+        name: stripAreaName(e, area, hass),
+        vertical: false,
+        tap_action: { action: 'perform-action', perform_action: 'button.press', target: { entity_id: e } },
       });
+    }
 
     miscCards.sort((a, b) => {
       const sA = hass.states[a.entity];
@@ -586,12 +650,13 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       return new Date(sB.last_changed).getTime() - new Date(sA.last_changed).getTime();
     });
 
-    if (miscCards.length > 0) {
+    if (miscCards.length + poweredSwitchCards.length > 0) {
       sections.push({
         type: 'grid',
         cards: [
           sectionSeparator(localize('room.misc'), 'mdi:dots-horizontal'),
           ...miscCards,
+          ...poweredSwitchCards,
         ],
       });
     }
@@ -679,6 +744,17 @@ class Simon42ViewRoomStrategy extends HTMLElement {
           }),
         ],
       });
+    }
+
+    // Personal-fork feature: raw Lovelace sections injected per area from the
+    // dashboard config (`room_custom_cards: { <area_id>: [ <section>, ... ] }`).
+    // Keeps entity IDs in the dashboard config, not in source — same rationale
+    // as climate_header_cards. Appended after the generated sections.
+    const roomCustomCards: Record<string, LovelaceSectionConfig[]> =
+      dashboardConfig.room_custom_cards || {};
+    const extraSections = roomCustomCards[area.area_id];
+    if (Array.isArray(extraSections)) {
+      for (const s of extraSections) sections.push(s);
     }
 
     debugLog(

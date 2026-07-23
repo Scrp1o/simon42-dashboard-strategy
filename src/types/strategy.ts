@@ -62,6 +62,7 @@ export interface Simon42StrategyConfig {
 
   // Special entities
   alarm_entity?: string;
+  overview_timer_entity?: string; // timer entity_id shown under the clock while active
   favorite_entities?: string[];
   room_pin_entities?: string[];
 
