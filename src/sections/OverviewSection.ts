@@ -11,7 +11,7 @@ import type { HomeAssistant } from '../types/homeassistant';
 import type { Simon42StrategyConfig, CustomCard } from '../types/strategy';
 import type { LovelaceCardConfig, LovelaceSectionConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
-import { buildVacuumModeTile } from '../utils/vacuum';
+import { buildVacuumModeTiles, buildWaterStationWarning } from '../utils/vacuum';
 import { sectionSeparator } from '../utils/headings';
 
 export interface OverviewSectionParams {
@@ -219,11 +219,16 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
         features_position: 'inline',
       },
     ];
-    if (config.vacuum_mode_entity) {
-      const modeTile = buildVacuumModeTile(config.vacuum_mode_entity, hass);
-      if (modeTile) vacuumInner.push(modeTile);
-    }
+    vacuumInner.push(...buildVacuumModeTiles(config.vacuum_mode_entity, hass));
     cards.push({ type: 'custom:vertical-stack-in-card', cards: vacuumInner });
+    // Mopping needs the water station; if its room is shut off, say so here —
+    // the multi-area dialog above is exactly where someone starts a mop job.
+    cards.push(
+      ...buildWaterStationWarning(config.vacuum_water_station_area, hass, {
+        blocked: localize('room.vacuum_water_station_blocked'),
+        areaName: hass.areas?.[config.vacuum_water_station_area || '']?.name || '',
+      })
+    );
     // Show which room is currently being cleaned (needs the target helper set by
     // the room-clean script). Standalone conditional card so it hides/shows live.
     const vacuumTarget = config.vacuum_target_helper;

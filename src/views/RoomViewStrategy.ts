@@ -15,7 +15,7 @@ import { stripAreaName, sortByLastChanged } from '../utils/name-utils';
 import { Registry } from '../Registry';
 import { timeStart, timeEnd, debugLog } from '../utils/debug';
 import { localize } from '../utils/localize';
-import { buildCleanRoomButton, buildVacuumModeTile, buildVacuumRoomStatus } from '../utils/vacuum';
+import { buildCleanRoomButton, buildVacuumModeTiles, buildVacuumRoomStatus, buildWaterStationWarning } from '../utils/vacuum';
 import { buildAdaptiveLightingTiles } from '../utils/adaptive-lighting';
 import { sectionSeparator } from '../utils/headings';
 import { BADGE_COLOR_MAP, getColorForEntity, isDefaultShowName, resolveShowName } from '../utils/badge-utils';
@@ -685,11 +685,8 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       !vacuumHiddenAreas.includes(area.area_id)
     ) {
       const vacuumInner: LovelaceCardConfig[] = [];
-      const modeEntity = dashboardConfig.vacuum_mode_entity as string | undefined;
-      if (modeEntity) {
-        const modeTile = buildVacuumModeTile(modeEntity, hass);
-        if (modeTile) vacuumInner.push(modeTile);
-      }
+      const modeEntities = dashboardConfig.vacuum_mode_entity as string | string[] | undefined;
+      vacuumInner.push(...buildVacuumModeTiles(modeEntities, hass));
       const cleanScript = dashboardConfig.vacuum_clean_script as string | undefined;
       const targetHelper = dashboardConfig.vacuum_target_helper as string | undefined;
       vacuumInner.push(
@@ -699,12 +696,18 @@ class Simon42ViewRoomStrategy extends HTMLElement {
         here: localize('room.vacuum_cleaning_here'),
         other: localize('room.vacuum_busy_other'),
       });
+      const stationArea = dashboardConfig.vacuum_water_station_area as string | undefined;
+      const stationWarning = buildWaterStationWarning(stationArea, hass, {
+        blocked: localize('room.vacuum_water_station_blocked'),
+        areaName: hass.areas?.[stationArea || '']?.name || '',
+      });
       sections.push({
         type: 'grid',
         cards: [
           sectionSeparator(localize('room.vacuum'), 'mdi:robot-vacuum'),
           { type: 'custom:vertical-stack-in-card', cards: vacuumInner },
           ...vacuumStatus,
+          ...stationWarning,
         ],
       });
     }

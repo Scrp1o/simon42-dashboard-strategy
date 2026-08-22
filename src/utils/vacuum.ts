@@ -2,6 +2,7 @@
 // Vacuum helpers — clean_area capability + shared card builders
 // ====================================================================
 
+import { Registry } from '../Registry';
 import type { HomeAssistant } from '../types/homeassistant';
 import type { LovelaceCardConfig } from '../types/lovelace';
 
@@ -109,4 +110,71 @@ export function buildVacuumModeTile(
     tile.features_position = 'inline';
   }
   return tile;
+}
+
+/**
+ * Tiles for the cleaning-settings entities. Accepts a single entity or a list,
+ * so a setup can expose several axes side by side (e.g. mop-vs-vacuum, suction,
+ * water) instead of one flattened preset dropdown. Missing entities are skipped.
+ */
+export function buildVacuumModeTiles(
+  entities: string | string[] | undefined,
+  hass: HomeAssistant
+): LovelaceCardConfig[] {
+  if (!entities) return [];
+  const list = Array.isArray(entities) ? entities : [entities];
+  return list
+    .map((id) => buildVacuumModeTile(id, hass))
+    .filter((card): card is LovelaceCardConfig => card !== null);
+}
+
+/**
+ * Door sensors belonging to an area, from the entity registry (NOT the visible
+ * set — a door sensor hidden from dashboards still governs whether the robot
+ * can physically get through).
+ */
+export function findAreaDoorSensors(areaId: string, hass: HomeAssistant): string[] {
+  return Registry.getEntitiesForArea(areaId)
+    .map((e) => e.entity_id)
+    .filter(
+      (id) =>
+        id.startsWith('binary_sensor.') &&
+        hass.states[id]?.attributes?.device_class === 'door'
+    );
+}
+
+/**
+ * Warning shown while the mop water station is unreachable.
+ *
+ * The station sits in some room; if every door of that room is closed the robot
+ * cannot get to it, so the mop can be neither watered nor washed. Rather than
+ * letting someone start a mop job that quietly cannot work, the card says so.
+ *
+ * Conditions are AND-ed, so the warning appears only when ALL of the area's door
+ * sensors read closed — one open door is enough to reach the station. Returns []
+ * when the area has no door sensor at all, which keeps the feature dormant until
+ * such a sensor exists.
+ */
+export function buildWaterStationWarning(
+  areaId: string | undefined,
+  hass: HomeAssistant,
+  labels: { blocked: string; areaName: string }
+): LovelaceCardConfig[] {
+  if (!areaId) return [];
+  const doors = findAreaDoorSensors(areaId, hass);
+  if (doors.length === 0) return [];
+  return [
+    {
+      type: 'conditional',
+      conditions: doors.map((entity) => ({ entity, state: 'off' })),
+      card: {
+        type: 'custom:mushroom-template-card',
+        icon: 'mdi:water-off',
+        icon_color: 'orange',
+        primary: labels.blocked,
+        secondary: labels.areaName,
+        layout: 'horizontal',
+      },
+    },
+  ];
 }

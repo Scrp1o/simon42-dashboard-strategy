@@ -1610,7 +1610,11 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
   private _renderVacuumSection(): TemplateResult {
     const vacuumEntity = this._config.vacuum_entity || '';
-    const vacuumModeEntity = this._config.vacuum_mode_entity || '';
+    const configuredModes = this._config.vacuum_mode_entity;
+    const vacuumModeEntities: string[] = !configuredModes
+      ? []
+      : Array.isArray(configuredModes) ? configuredModes : [configuredModes];
+    const waterStationArea = this._config.vacuum_water_station_area || '';
     const showVacuumCard = this._config.show_vacuum_card === true;
     const hiddenAreas: string[] = this._config.vacuum_hidden_areas || [];
     const vacuums = this._getVacuumEntities();
@@ -1632,16 +1636,26 @@ class Simon42DashboardStrategyEditor extends LitElement {
         </div>
         <div class="description">${localize('editor.vacuum_entity_desc')}</div>
 
-        <div class="form-row">
-          <label for="vacuum-mode-entity" style="margin-right: 8px; min-width: 120px;">${localize('editor.vacuum_mode_entity')}</label>
-          <select id="vacuum-mode-entity" style="flex: 1;" @change=${this._vacuumModeEntityChanged}>
-            <option value="" ?selected=${!vacuumModeEntity}>${localize('editor.vacuum_none')}</option>
-            ${modeEntities.map((v) => html`
-              <option value=${v.entity_id} ?selected=${v.entity_id === vacuumModeEntity}>${v.name}</option>
+        <div style="font-size: 13px; font-weight: 500; margin-top: 12px; margin-bottom: 4px;">
+          ${localize('editor.vacuum_mode_entity')}
+        </div>
+        <div class="description">${localize('editor.vacuum_mode_entity_desc')}</div>
+        ${modeEntities.map((v) => this._renderCheckbox(
+          `vacuum-mode-${v.entity_id.replace(/\./g, '-')}`,
+          v.name,
+          vacuumModeEntities.includes(v.entity_id),
+          (checked) => this._toggleVacuumModeEntity(v.entity_id, checked)))}
+
+        <div class="form-row" style="margin-top: 12px;">
+          <label for="vacuum-water-station-area" style="margin-right: 8px; min-width: 120px;">${localize('editor.vacuum_water_station_area')}</label>
+          <select id="vacuum-water-station-area" style="flex: 1;" @change=${this._vacuumWaterStationAreaChanged}>
+            <option value="" ?selected=${!waterStationArea}>${localize('editor.vacuum_none')}</option>
+            ${areas.map((a) => html`
+              <option value=${a.area_id} ?selected=${a.area_id === waterStationArea}>${a.name}</option>
             `)}
           </select>
         </div>
-        <div class="description">${localize('editor.vacuum_mode_entity_desc')}</div>
+        <div class="description">${localize('editor.vacuum_water_station_area_desc')}</div>
 
         ${this._renderCheckbox('show-vacuum-card', localize('editor.show_vacuum_card'), showVacuumCard,
           (checked) => this._toggleChanged('show_vacuum_card', checked, false))}
@@ -2345,11 +2359,29 @@ class Simon42DashboardStrategyEditor extends LitElement {
     this._fireConfigChanged(newConfig);
   }
 
-  private _vacuumModeEntityChanged(e: Event): void {
-    if (!this._hass) return;
-    const entityId = (e.target as HTMLSelectElement).value;
-    const newConfig: Simon42StrategyConfig = { ...this._config, vacuum_mode_entity: entityId };
-    if (!entityId) delete newConfig.vacuum_mode_entity;
+  /**
+   * Cleaning-settings entities are a list: a setup can expose mop-vs-vacuum,
+   * suction and water as separate selectors instead of one opaque preset.
+   * A single configured string stays valid and is upgraded to a list here.
+   */
+  private _toggleVacuumModeEntity(entityId: string, selected: boolean): void {
+    const configured = this._config.vacuum_mode_entity;
+    const current: string[] = !configured
+      ? []
+      : Array.isArray(configured) ? configured : [configured];
+    const next = selected
+      ? [...new Set([...current, entityId])]
+      : current.filter((id) => id !== entityId);
+    const newConfig: Simon42StrategyConfig = { ...this._config, vacuum_mode_entity: next };
+    if (next.length === 0) delete newConfig.vacuum_mode_entity;
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  private _vacuumWaterStationAreaChanged(e: Event): void {
+    const areaId = (e.target as HTMLSelectElement).value;
+    const newConfig: Simon42StrategyConfig = { ...this._config, vacuum_water_station_area: areaId };
+    if (!areaId) delete newConfig.vacuum_water_station_area;
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }

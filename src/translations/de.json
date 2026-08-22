@@ -11,8 +11,8 @@
     "climate": "Klima",
     "persons": "Personen",
     "sleep_probability": "Schlafwahrscheinlichkeit",
-  "next_alarm": "Nächster Wecker",
-  "asleep_since": "Schläft seit",
+    "next_alarm": "Nächster Wecker",
+    "asleep_since": "Schläft seit",
     "asleep": "Schläft",
     "awake": "Wach",
     "adaptive_lighting": "Adaptives Licht"
@@ -117,7 +117,8 @@
     "vacuum_cleaning_here": "Wird gerade hier gesaugt",
     "vacuum_busy_other": "Staubsauger reinigt einen anderen Raum",
     "vacuum_currently": "Reinigt gerade",
-    "adaptive_lighting": "Adaptives Licht"
+    "adaptive_lighting": "Adaptives Licht",
+    "vacuum_water_station_blocked": "Wischen nicht möglich – Tür zur Wasserstation zu"
   },
   "editor": {
     "section_order": "Abschnitts-Reihenfolge",
@@ -163,8 +164,8 @@
     "vacuum_entity": "Staubsauger",
     "vacuum_entity_desc": "Saugroboter für die Raumreinigung. Es werden nur Sauger aufgelistet, die das Reinigen nach Bereich unterstützen.",
     "vacuum_none": "Keiner",
-    "vacuum_mode_entity": "Reinigungsmodus",
-    "vacuum_mode_entity_desc": "Optionale Entität (Auswahl), um den Reinigungsmodus zu wählen; wird neben den Staubsauger-Steuerungen angezeigt.",
+    "vacuum_mode_entity": "Reinigungs-Einstellungen",
+    "vacuum_mode_entity_desc": "Optionale Entitäten (Auswahl) für die Reinigungs-Einstellungen – z. B. Saugen/Wischen, Saugstufe und Wassermenge getrennt. Es wird eine Kachel je Auswahl angezeigt, in der Übersicht und in jedem Raum.",
     "show_vacuum_card": "Staubsauger-Karte in der Übersicht anzeigen",
     "show_vacuum_card_desc": "Fügt der Startseite eine Staubsauger-Karte für die native Mehrbereichs-Reinigung hinzu.",
     "vacuum_hidden_areas": "Reinigen-Button in diesen Räumen ausblenden",
@@ -261,6 +262,8 @@
     "badges_select_entity": "Entity auswählen...",
     "badges_remove": "Entfernen",
     "badges_show_name": "Entity-Name auf Badge anzeigen",
-    "badges_name_short": "Name"
+    "badges_name_short": "Name",
+    "vacuum_water_station_area": "Raum der Wasserstation",
+    "vacuum_water_station_area_desc": "Raum, in dem die Wasserstation des Wischmopps steht. Sind alle Türsensoren dieses Raums geschlossen, kommt der Sauger nicht an die Station – es wird dann ein Hinweis angezeigt. Ohne Türsensor im Raum passiert nichts."
   }
 }
