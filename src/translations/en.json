@@ -11,8 +11,8 @@
     "climate": "Climate",
     "persons": "People",
     "sleep_probability": "Sleep probability",
-  "next_alarm": "Next alarm",
-  "asleep_since": "Asleep for",
+    "next_alarm": "Next alarm",
+    "asleep_since": "Asleep for",
     "asleep": "Asleep",
     "awake": "Awake",
     "adaptive_lighting": "Adaptive Lighting"
@@ -117,7 +117,8 @@
     "vacuum_cleaning_here": "Cleaning this room now",
     "vacuum_busy_other": "Vacuum busy in another room",
     "vacuum_currently": "Currently cleaning",
-    "adaptive_lighting": "Adaptive Lighting"
+    "adaptive_lighting": "Adaptive Lighting",
+    "vacuum_water_station_blocked": "Mopping unavailable – water station door closed"
   },
   "editor": {
     "section_order": "Section Order",
@@ -163,8 +164,8 @@
     "vacuum_entity": "Vacuum",
     "vacuum_entity_desc": "Robot vacuum used for room cleaning. Only vacuums that support cleaning by area are listed.",
     "vacuum_none": "None",
-    "vacuum_mode_entity": "Cleaning mode",
-    "vacuum_mode_entity_desc": "Optional entity (select) to choose the cleaning mode, shown next to the vacuum controls.",
+    "vacuum_mode_entity": "Cleaning settings",
+    "vacuum_mode_entity_desc": "Optional entities (select) for the cleaning settings — e.g. mop/vacuum, suction and water level separately. One tile is rendered per entry, on the overview and in every room.",
     "show_vacuum_card": "Show vacuum card on overview",
     "show_vacuum_card_desc": "Adds a vacuum card to the home view for native multi-area cleaning.",
     "vacuum_hidden_areas": "Hide clean button in these rooms",
@@ -261,6 +262,8 @@
     "badges_select_entity": "Select entity...",
     "badges_remove": "Remove",
     "badges_show_name": "Show entity name on badge",
-    "badges_name_short": "Name"
+    "badges_name_short": "Name",
+    "vacuum_water_station_area": "Water station room",
+    "vacuum_water_station_area_desc": "Room holding the mop water station. While every door sensor in that room reads closed the vacuum cannot reach the station, so a warning is shown. Does nothing if the room has no door sensor."
   }
 }

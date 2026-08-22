@@ -93,11 +93,12 @@ export interface Simon42StrategyConfig {
 
   // Vacuum room cleaning
   vacuum_entity?: string; // vacuum entity_id supporting clean_area (feature 16384)
-  vacuum_mode_entity?: string; // optional entity (select/input_select) for cleaning mode
+  vacuum_mode_entity?: string | string[]; // optional entity — or list of entities — (select/input_select) for cleaning settings; one tile is rendered per entry, on the overview card and in every room view
   vacuum_hidden_areas?: string[]; // area_ids excluded from the per-room clean button
   show_vacuum_card?: boolean; // default: false — show vacuum card on overview
   vacuum_clean_script?: string; // optional script called with {area_id} instead of vacuum.clean_area — lets you record which room was started (room tracking)
   vacuum_target_helper?: string; // input_text holding the area_id currently being cleaned (set by vacuum_clean_script) — drives per-room "cleaning here / busy elsewhere" status
+  vacuum_water_station_area?: string; // area_id of the mop water station. Door sensors in that area gate mopping: with every door closed the robot cannot reach the station, so a warning is shown. Dormant while the area has no door sensor.
 
   // Adaptive Lighting (niche — default off)
   adaptive_lighting?: Record<string, AdaptiveLightingMapping>; // area_id -> switches
