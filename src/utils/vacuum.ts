@@ -128,6 +128,60 @@ export function buildVacuumModeTiles(
     .filter((card): card is LovelaceCardConfig => card !== null);
 }
 
+// -- Cleaning history ---------------------------------------------------
+//
+// Opt-in by naming convention (no config, no hardcoded entities): a room gets
+// its history once these helpers exist, typically kept up to date by an
+// automation that stamps them when a run finishes.
+//
+//   input_datetime.vacuum_last_vacuumed_<area_id>   (required)
+//   input_datetime.vacuum_last_mopped_<area_id>     (optional)
+//   binary_sensor.vacuum_due_<area_id>              (optional, device_class problem)
+//
+// Timestamps before 2000 mean "never": input_datetime cannot be empty and
+// defaults to today, so a far-past sentinel is the only way to say "not yet".
+
+export const vacuumHistoryEntities = (areaId: string) => ({
+  vacuumed: `input_datetime.vacuum_last_vacuumed_${areaId}`,
+  mopped: `input_datetime.vacuum_last_mopped_${areaId}`,
+  due: `binary_sensor.vacuum_due_${areaId}`,
+});
+
+/**
+ * "Vacuumed 2 days ago / Mopped never" line for a room's vacuum card. Returns
+ * null when the room has no history helper. Rendered server-side by a mushroom
+ * template (reactive), in calendar days; the icon turns orange while the room's
+ * due sensor is on.
+ */
+export function buildVacuumHistoryCard(
+  areaId: string,
+  hass: HomeAssistant,
+  labels: { vacuumed: string; mopped: string; never: string; today: string; yesterday: string; daysAgo: string }
+): LovelaceCardConfig | null {
+  const ids = vacuumHistoryEntities(areaId);
+  if (!hass.states[ids.vacuumed]) return null;
+
+  // One macro per template: Jinja macros don't cross mushroom's primary/secondary.
+  const ago =
+    `{% macro ago(e) %}{% set ts = state_attr(e, 'timestamp') %}` +
+    `{% if ts is not number or ts < 946684800 %}${labels.never}{% else %}` +
+    `{% set d = (now().date() - as_local(as_datetime(ts)).date()).days %}` +
+    `{% if d <= 0 %}${labels.today}{% elif d == 1 %}${labels.yesterday}` +
+    `{% else %}${labels.daysAgo.replace('{n}', '{{ d }}')}{% endif %}{% endif %}{% endmacro %}`;
+
+  const card: LovelaceCardConfig = {
+    type: 'custom:mushroom-template-card',
+    icon: 'mdi:history',
+    icon_color: hass.states[ids.due] ? `{{ 'orange' if is_state('${ids.due}', 'on') else 'disabled' }}` : 'disabled',
+    primary: `${ago}${labels.vacuumed} {{ ago('${ids.vacuumed}') }}`,
+    layout: 'horizontal',
+  };
+  if (hass.states[ids.mopped]) {
+    card.secondary = `${ago}${labels.mopped} {{ ago('${ids.mopped}') }}`;
+  }
+  return card;
+}
+
 /**
  * Door sensors belonging to an area, from the entity registry (NOT the visible
  * set — a door sensor hidden from dashboards still governs whether the robot

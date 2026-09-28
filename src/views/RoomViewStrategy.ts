@@ -15,7 +15,7 @@ import { stripAreaName, sortByLastChanged } from '../utils/name-utils';
 import { Registry } from '../Registry';
 import { timeStart, timeEnd, debugLog } from '../utils/debug';
 import { localize } from '../utils/localize';
-import { buildCleanRoomButton, buildVacuumModeTiles, buildVacuumRoomStatus, buildWaterStationWarning } from '../utils/vacuum';
+import { buildCleanRoomButton, buildVacuumHistoryCard, buildVacuumModeTiles, buildVacuumRoomStatus, buildWaterStationWarning } from '../utils/vacuum';
 import { buildAdaptiveLightingTiles } from '../utils/adaptive-lighting';
 import { sectionSeparator } from '../utils/headings';
 import { BADGE_COLOR_MAP, getColorForEntity, isDefaultShowName, resolveShowName } from '../utils/badge-utils';
@@ -145,8 +145,12 @@ class Simon42ViewRoomStrategy extends HTMLElement {
         roomEntities.locks.push(entityId);
         continue;
       }
-      if (domain === 'automation' && dashboardConfig.show_automations_in_rooms) {
-        roomEntities.automations.push(entityId);
+      // Automations: all of the area's with show_automations_in_rooms, otherwise
+      // opt-in per automation via the `show_dboard` label (same as buttons).
+      if (domain === 'automation') {
+        if (dashboardConfig.show_automations_in_rooms || entity.labels?.includes('show_dboard')) {
+          roomEntities.automations.push(entityId);
+        }
         continue;
       }
       if (domain === 'script' && dashboardConfig.show_scripts_in_rooms) {
@@ -692,6 +696,15 @@ class Simon42ViewRoomStrategy extends HTMLElement {
       vacuumInner.push(
         buildCleanRoomButton(vacuumEntity, area.area_id, localize('room.vacuum_clean_here'), cleanScript)
       );
+      const historyCard = buildVacuumHistoryCard(area.area_id, hass, {
+        vacuumed: localize('room.vacuum_history_vacuumed'),
+        mopped: localize('room.vacuum_history_mopped'),
+        never: localize('room.vacuum_history_never'),
+        today: localize('room.vacuum_history_today'),
+        yesterday: localize('room.vacuum_history_yesterday'),
+        daysAgo: localize('room.vacuum_history_days_ago'),
+      });
+      if (historyCard) vacuumInner.push(historyCard);
       const vacuumStatus = buildVacuumRoomStatus(vacuumEntity, area.area_id, targetHelper, {
         here: localize('room.vacuum_cleaning_here'),
         other: localize('room.vacuum_busy_other'),

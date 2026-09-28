@@ -118,7 +118,13 @@
     "vacuum_busy_other": "Staubsauger reinigt einen anderen Raum",
     "vacuum_currently": "Reinigt gerade",
     "adaptive_lighting": "Adaptives Licht",
-    "vacuum_water_station_blocked": "Wischen nicht möglich – Tür zur Wasserstation zu"
+    "vacuum_water_station_blocked": "Wischen nicht möglich – Tür zur Wasserstation zu",
+    "vacuum_history_vacuumed": "Gesaugt",
+    "vacuum_history_mopped": "Gewischt",
+    "vacuum_history_never": "nie",
+    "vacuum_history_today": "heute",
+    "vacuum_history_yesterday": "gestern",
+    "vacuum_history_days_ago": "vor {n} Tagen"
   },
   "editor": {
     "section_order": "Abschnitts-Reihenfolge",
@@ -198,7 +204,7 @@
     "show_locks_in_rooms": "Schlösser in Raum-Ansichten anzeigen",
     "show_locks_in_rooms_desc": "Zeigt Schlösser (z.B. Nuki) in den jeweiligen Raum-Ansichten an. Schlösser erscheinen unabhängig davon immer in der Sicherheits-Übersicht.",
     "show_automations_in_rooms": "Automationen in Raum-Ansichten anzeigen",
-    "show_automations_in_rooms_desc": "Zeigt dem Bereich zugeordnete Automationen in den jeweiligen Raum-Ansichten an.",
+    "show_automations_in_rooms_desc": "Zeigt alle dem Bereich zugeordneten Automationen in den jeweiligen Raum-Ansichten an. Wenn aus, erscheinen nur Automationen mit dem Label show_dboard.",
     "show_scripts_in_rooms": "Skripte in Raum-Ansichten anzeigen",
     "show_scripts_in_rooms_desc": "Zeigt dem Bereich zugeordnete Skripte in den jeweiligen Raum-Ansichten an.",
     "show_window_contacts_in_rooms": "Fensterkontakte in Raum-Ansichten anzeigen",
