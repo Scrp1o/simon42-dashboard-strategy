@@ -145,8 +145,12 @@ class Simon42ViewRoomStrategy extends HTMLElement {
         roomEntities.locks.push(entityId);
         continue;
       }
-      if (domain === 'automation' && dashboardConfig.show_automations_in_rooms) {
-        roomEntities.automations.push(entityId);
+      // Automations: all of the area's with show_automations_in_rooms, otherwise
+      // opt-in per automation via the `show_dboard` label (same as buttons).
+      if (domain === 'automation') {
+        if (dashboardConfig.show_automations_in_rooms || entity.labels?.includes('show_dboard')) {
+          roomEntities.automations.push(entityId);
+        }
         continue;
       }
       if (domain === 'script' && dashboardConfig.show_scripts_in_rooms) {

@@ -198,7 +198,7 @@
     "show_locks_in_rooms": "Show locks in room views",
     "show_locks_in_rooms_desc": "Shows locks (e.g. Nuki) in the respective room views. Locks always appear in the security overview regardless.",
     "show_automations_in_rooms": "Show automations in room views",
-    "show_automations_in_rooms_desc": "Shows automations assigned to the area in the respective room views.",
+    "show_automations_in_rooms_desc": "Shows all automations assigned to the area in the respective room views. When off, only automations labeled show_dboard are shown.",
     "show_scripts_in_rooms": "Show scripts in room views",
     "show_scripts_in_rooms_desc": "Shows scripts assigned to the area in the respective room views.",
     "show_window_contacts_in_rooms": "Show window contacts in room views",
