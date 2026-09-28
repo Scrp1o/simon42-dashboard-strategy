@@ -12,6 +12,7 @@ import type { AreaRegistryEntry } from '../types/registries';
 import { Registry } from '../Registry';
 import { localize } from '../utils/localize';
 import { sectionSeparator } from '../utils/headings';
+import { vacuumHistoryEntities } from '../utils/vacuum';
 
 // Area control domains to check (same as HA, with optional 'switch')
 const CONTROL_DOMAINS = [
@@ -113,14 +114,31 @@ function buildAreaCard(area: AreaRegistryEntry, hass: HomeAssistant): LovelaceCa
   // Pre-filter alert classes if enabled
   const alertClasses = Registry.config.show_alerts_on_areas
     ? getAreaAlertClasses(area.area_id, hass)
-    : undefined;
+    : [];
+
+  // Cleaning overdue: a room's vacuum_due_<area> sensor (device_class problem,
+  // own icon) shows as an alert icon. 'problem' is otherwise not in the allowlist
+  // (too noisy), so every other problem sensor of the area is excluded — the only
+  // problem icon that can appear is the cleaning one.
+  const dueSensor = vacuumHistoryEntities(area.area_id).due;
+  const excludeEntities: string[] = [];
+  if (hass.states[dueSensor]) {
+    if (!alertClasses.includes('problem')) alertClasses.push('problem');
+    for (const entity of Registry.getEntitiesForArea(area.area_id)) {
+      const id = entity.entity_id;
+      if (id !== dueSensor && id.startsWith('binary_sensor.') && hass.states[id]?.attributes?.device_class === 'problem') {
+        excludeEntities.push(id);
+      }
+    }
+  }
 
   return {
     type: 'area',
     area: area.area_id,
     display_type: 'compact',
     sensor_classes: sensorClasses.length > 0 ? sensorClasses : undefined,
-    alert_classes: alertClasses && alertClasses.length > 0 ? alertClasses : undefined,
+    alert_classes: alertClasses.length > 0 ? alertClasses : undefined,
+    ...(excludeEntities.length > 0 ? { exclude_entities: excludeEntities } : {}),
     features: controls.length > 0 ? [{ type: 'area-controls', controls }] : [],
     features_position: 'inline',
     navigation_path: area.area_id,

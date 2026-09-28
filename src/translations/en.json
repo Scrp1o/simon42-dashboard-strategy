@@ -118,7 +118,13 @@
     "vacuum_busy_other": "Vacuum busy in another room",
     "vacuum_currently": "Currently cleaning",
     "adaptive_lighting": "Adaptive Lighting",
-    "vacuum_water_station_blocked": "Mopping unavailable – water station door closed"
+    "vacuum_water_station_blocked": "Mopping unavailable – water station door closed",
+    "vacuum_history_vacuumed": "Vacuumed",
+    "vacuum_history_mopped": "Mopped",
+    "vacuum_history_never": "never",
+    "vacuum_history_today": "today",
+    "vacuum_history_yesterday": "yesterday",
+    "vacuum_history_days_ago": "{n} days ago"
   },
   "editor": {
     "section_order": "Section Order",

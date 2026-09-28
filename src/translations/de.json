@@ -118,7 +118,13 @@
     "vacuum_busy_other": "Staubsauger reinigt einen anderen Raum",
     "vacuum_currently": "Reinigt gerade",
     "adaptive_lighting": "Adaptives Licht",
-    "vacuum_water_station_blocked": "Wischen nicht möglich – Tür zur Wasserstation zu"
+    "vacuum_water_station_blocked": "Wischen nicht möglich – Tür zur Wasserstation zu",
+    "vacuum_history_vacuumed": "Gesaugt",
+    "vacuum_history_mopped": "Gewischt",
+    "vacuum_history_never": "nie",
+    "vacuum_history_today": "heute",
+    "vacuum_history_yesterday": "gestern",
+    "vacuum_history_days_ago": "vor {n} Tagen"
   },
   "editor": {
     "section_order": "Abschnitts-Reihenfolge",
