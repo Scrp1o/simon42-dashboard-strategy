@@ -241,7 +241,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
           icon: 'mdi:broom',
           icon_color: 'green',
           primary: localize('room.vacuum_currently'),
-          secondary: `{{ area_name(states('${vacuumTarget}')) or '—' }}`,
+          secondary: `{{ states('${vacuumTarget}').split(',') | map('area_name') | select | join(', ') or '—' }}`,
           layout: 'horizontal',
         },
       });
