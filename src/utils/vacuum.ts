@@ -74,7 +74,8 @@ export function buildVacuumRoomStatus(
   // "busy in another room"; without one it shows the generic "busy" message.
   let card: LovelaceCardConfig;
   if (targetHelper) {
-    const here = `is_state('${targetHelper}', '${areaId}')`;
+    // The helper may hold several comma-separated area_ids (multi-room start).
+    const here = `('${areaId}' in states('${targetHelper}').split(','))`;
     card = {
       type: 'custom:mushroom-template-card',
       icon: `{{ 'mdi:broom' if ${here} else 'mdi:robot-vacuum' }}`,
