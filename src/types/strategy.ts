@@ -83,6 +83,13 @@ export interface Simon42StrategyConfig {
   // strategy stays generic (no hardcoded entities). Personal-fork feature.
   climate_header_cards?: any[];
 
+  // Security view — when alarm_entity is set, an "Alarm" section with an arm/disarm
+  // tile goes first. alarm_modes limits the offered arm modes (default: all the entity
+  // supports); security_header_cards are raw Lovelace cards appended to that section.
+  // Personal-fork feature.
+  alarm_modes?: string[];
+  security_header_cards?: any[];
+
   // Custom cards (shown as own section on overview)
   custom_cards?: CustomCard[];
   custom_cards_heading?: string;

@@ -49,6 +49,41 @@ class Simon42ViewSecurityStrategy extends HTMLElement {
     }
 
     const sections: LovelaceSectionConfig[] = [];
+    const userConfig = config.config || {};
+
+    // Alarm control (personal fork): when alarm_entity is configured, the alarm panel
+    // goes first — big tile with arm/disarm buttons (HA's alarm-modes feature shows a
+    // disarm button by itself while armed). alarm_modes limits the offered modes;
+    // default = every arm mode the entity supports.
+    const alarmEntity: string | undefined = userConfig.alarm_entity;
+    const headerCards = Array.isArray(userConfig.security_header_cards) ? userConfig.security_header_cards : [];
+    if ((alarmEntity && hass.states[alarmEntity]) || headerCards.length > 0) {
+      const cards: LovelaceCardConfig[] = [sectionSeparator(localize('security.alarm'), 'mdi:shield-home')];
+      if (alarmEntity && hass.states[alarmEntity]) {
+        const supported = Number(hass.states[alarmEntity].attributes?.supported_features ?? 0);
+        // AlarmControlPanelEntityFeature bits
+        const modeBits: Record<string, number> = {
+          armed_home: 1,
+          armed_away: 2,
+          armed_night: 4,
+          armed_custom_bypass: 16,
+          armed_vacation: 32,
+        };
+        const modes: string[] = Array.isArray(userConfig.alarm_modes) && userConfig.alarm_modes.length > 0
+          ? userConfig.alarm_modes
+          : Object.keys(modeBits).filter((m) => (supported & modeBits[m]) !== 0);
+        cards.push({
+          type: 'tile',
+          entity: alarmEntity,
+          vertical: false,
+          state_content: ['state', 'last_changed'],
+          features: [{ type: 'alarm-modes', modes }],
+          grid_options: { columns: 'full' },
+        });
+      }
+      cards.push(...headerCards);
+      sections.push({ type: 'grid', cards });
+    }
 
     // Locks
     if (locks.length > 0) {

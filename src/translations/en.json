@@ -72,6 +72,7 @@
     "windows_close_all": "Close all"
   },
   "security": {
+    "alarm": "Alarm",
     "locks_unlocked": "Locks - Unlocked",
     "locks_locked": "Locks - Locked",
     "doors_open": "Doors, Gates & Windows - Open",
