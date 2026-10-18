@@ -72,6 +72,7 @@
     "windows_close_all": "Alle schließen"
   },
   "security": {
+    "alarm": "Alarm",
     "locks_unlocked": "Schlösser - Entriegelt",
     "locks_locked": "Schlösser - Verriegelt",
     "doors_open": "Türen, Tore & Fenster - Offen",
