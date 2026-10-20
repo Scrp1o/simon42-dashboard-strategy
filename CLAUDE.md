@@ -130,7 +130,7 @@ Many entity properties exist ONLY in the Entity Registry, NOT in state attribute
 - **Layout**: summaries_columns (2 | 4)
 - **Area-level**: areas_display.hidden, areas_display.order
 - **Entity-level**: areas_options.{areaId}.groups_options.{domain}.hidden
-- **Special**: room_pin_entities, alarm_entity, favorite_entities, custom_views, climate_header_cards (raw Lovelace cards prepended above the generated Climate/Thermostat view — personal-fork feature, keeps entity IDs in dashboard config not source), alarm_modes + security_header_cards (with alarm_entity set, the Security view starts with an "Alarm" section: tile with the alarm-modes feature limited to alarm_modes — default all supported — followed by security_header_cards; personal-fork feature)
+- **Special**: room_pin_entities, alarm_entity, favorite_entities, custom_views, climate_header_cards (raw Lovelace cards prepended above the generated Climate/Thermostat view — personal-fork feature, keeps entity IDs in dashboard config not source), alarm_modes + security_header_cards (with alarm_entity set, the Security view starts with an "Alarm" section: tile with the alarm-modes feature limited to alarm_modes — default all supported, [] = no buttons — followed by security_header_cards; personal-fork feature)
 
 ## Complexity Hotspots
 

@@ -85,7 +85,8 @@ export interface Simon42StrategyConfig {
 
   // Security view — when alarm_entity is set, an "Alarm" section with an arm/disarm
   // tile goes first. alarm_modes limits the offered arm modes (default: all the entity
-  // supports); security_header_cards are raw Lovelace cards appended to that section.
+  // supports, [] = no buttons — tap opens the alarm dialog); security_header_cards are
+  // raw Lovelace cards appended to that section.
   // Personal-fork feature.
   alarm_modes?: string[];
   security_header_cards?: any[];
